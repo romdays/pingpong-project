@@ -1,0 +1,20 @@
+import numpy as np
+
+CALIB_PARAM = np.load('./data/npz/calib.npz')
+
+FRAME_INTERVAL=1
+
+TABLE_WIDTH = 152.5 # cm
+TABLE_LENGTH = 274.0 # cm
+TABLE_POINTS = np.array([
+    ( TABLE_LENGTH/2,  TABLE_WIDTH/2, 0),
+    ( TABLE_LENGTH/2, -TABLE_WIDTH/2, 0),
+    (-TABLE_LENGTH/2, -TABLE_WIDTH/2, 0),
+    (-TABLE_LENGTH/2,  TABLE_WIDTH/2, 0)
+    ])
+
+MIN_CIRCULARITY = 0.35
+MIN_COUNTOUR_AREA = 100
+MAX_COUNTOUR_AREA = 1000
+
+MAX_DISTANCE = 30 # cm
