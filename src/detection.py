@@ -5,11 +5,12 @@ from settings import (
     MIN_CIRCULARITY,
     MIN_COUNTOUR_AREA,
     MAX_COUNTOUR_AREA,
+    FRAME_INTERVAL,
+    LOWER_COLOR,
+    UPPER_COLOR
 )
 
 def detection(images):
-    outframe = images[1]
-
     prev_img = cv2.blur(cv2.cvtColor(images[0], cv2.COLOR_BGR2GRAY), ksize=(5,5))
     curr_img = cv2.blur(cv2.cvtColor(images[1], cv2.COLOR_BGR2GRAY), ksize=(5,5))
     next_img = cv2.blur(cv2.cvtColor(images[2], cv2.COLOR_BGR2GRAY), ksize=(5,5))
@@ -24,23 +25,26 @@ def detection(images):
 
     # get moving object
     move_obj = c_n_diff*p_c_diff*255
-    move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
+
+    # closing first
+    kernel = np.ones((5,5),np.uint8)
+    move_obj = cv2.morphologyEx(move_obj, cv2.MORPH_CLOSE, kernel)
 
     # extraction ping-pong color space
-    lower_color = np.array([0,0,200])
-    upper_color = np.array([180,100,255])
+    move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
     hsv = cv2.cvtColor(move_obj, cv2.COLOR_BGR2HSV)
-    moving_and_white_obj = cv2.inRange(hsv, lower_color, upper_color)
+    moving_and_white_obj = cv2.inRange(hsv, LOWER_COLOR, UPPER_COLOR)
 
-    #closing
-    kernel = np.ones((5,5),np.uint8)
+    # closing second
     moving_and_white_obj = cv2.morphologyEx(moving_and_white_obj, cv2.MORPH_CLOSE, kernel)
 
     # select candidates for ball object
     contours, hierarchy = cv2.findContours(moving_and_white_obj, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     objs = []
     candidates = []
+    info = []
     for cnt in contours:
+        cnt = cv2.convexHull(cnt)
         arclen = cv2.arcLength(cnt, True)
         if arclen < 1e-8: continue
         mu = cv2.moments(cnt)
@@ -51,35 +55,38 @@ def detection(images):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
 
             objs.append((x,y))
+
             candidates.append(cnt)
+            info.append((area, circularity, x, y))
 
-            print('area: {}, circularity: {}, (x,y): {}'.format(area, circularity, (x,y)))
-
-    bg = np.zeros(outframe.shape)
+    # debug
+    outframe = images[1]
+    moving_and_white_obj=np.expand_dims(moving_and_white_obj, axis=2)
+    moving_and_white_obj=np.concatenate((moving_and_white_obj,moving_and_white_obj,moving_and_white_obj), axis=2)
     if len(candidates)==1:
         cv2.drawContours(outframe,candidates,-1,(0,255,0),3)
-        cv2.drawContours(bg,candidates,-1,(0,255,0),-1)
+        cv2.drawContours(moving_and_white_obj,candidates,-1,(0,255,0),-1)
+        # cv2.drawContours(move_obj,candidates,-1,(0,255,0),-1)
     elif len(candidates)>1:
         cv2.drawContours(outframe,candidates,-1,(0,0,255),3)
-        cv2.drawContours(bg,candidates,-1,(0,0,255),-1)
+        cv2.drawContours(moving_and_white_obj,candidates,-1,(0,0,255),-1)
+        # cv2.drawContours(move_obj,candidates,-1,(0,0,255),-1)
 
-    cv2.imshow('detection3', bg)
+    for i, data in enumerate(info):
+        text='area: {}, circularity: {}, (x,y): {}'.format(data[0], data[1], (data[2],data[3]))
+        cv2.putText(moving_and_white_obj, text, (10, 50*(i+1)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2, cv2.LINE_AA)
+
     cv2.imshow('detection2', moving_and_white_obj)
     cv2.imshow('detection', outframe)
 
-    moving_and_white_obj=np.expand_dims(moving_and_white_obj, axis=2)
-    moving_and_white_obj=np.concatenate((moving_and_white_obj,moving_and_white_obj,moving_and_white_obj), axis=2)
-
-    return objs, np.concatenate((outframe, bg, moving_and_white_obj), axis=0).astype(np.uint8)
+    return objs, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
 
 
 if __name__ == '__main__':
-    FRAME_INTERVAL=2
-
     images = []
 
     # cap = cv2.VideoCapture('./data/videos/003.mp4')
-    cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0023.MP4')
+    cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
 
     for i in range(FRAME_INTERVAL*2):
         ret, frame = cap.read()
@@ -88,7 +95,7 @@ if __name__ == '__main__':
             exit()
 
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-    out = cv2.VideoWriter('./data/output/output.mp4',fourcc, 30.0, (frame.shape[1], frame.shape[0]*3))
+    out = cv2.VideoWriter('./data/output/output.mp4',fourcc, 60.0, (frame.shape[1], frame.shape[0]*2))
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -103,7 +110,6 @@ if __name__ == '__main__':
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
 
     cap.release()
     out.release()
