@@ -116,32 +116,24 @@ if __name__ == '__main__':
 
 
     # -------------calc vec CameraA to point, Camera to point 
-    w_point_onscreenA = camera_A.convert_point_screen2world(Ipoint_onimageA)
-    w_point_onscreenB = camera_B.convert_point_screen2world(Ipoint_onimageB)
+    TA = 1500
+    w_point_on_line_A = camera_A.camera_position+camera_A.vecs_PoV2objects([Ipoint_onimageA])[0]*TA
+    TB = 1000
+    w_point_on_line_B = camera_B.camera_position+camera_B.vecs_PoV2objects([Ipoint_onimageB])[0]*TB
 
-
-    TA = -1500
-    w_point_x_on_line_A=camera_A.camera_position[0,0]+(camera_A.camera_position[0,0]-w_point_onscreenA[0,0])*TA
-    w_point_y_on_line_A=camera_A.camera_position[1,0]+(camera_A.camera_position[1,0]-w_point_onscreenA[1,0])*TA
-    w_point_z_on_line_A=camera_A.camera_position[2,0]+(camera_A.camera_position[2,0]-w_point_onscreenA[2,0])*TA
-    TB = -1000
-    w_point_x_on_line_B=camera_B.camera_position[0,0]+(camera_B.camera_position[0,0]-w_point_onscreenB[0,0])*TB
-    w_point_y_on_line_B=camera_B.camera_position[1,0]+(camera_B.camera_position[1,0]-w_point_onscreenB[1,0])*TB
-    w_point_z_on_line_B=camera_B.camera_position[2,0]+(camera_B.camera_position[2,0]-w_point_onscreenB[2,0])*TB
-
-    linex = [camera_A.camera_position[0,0], w_point_x_on_line_A]
-    liney = [camera_A.camera_position[1,0], w_point_y_on_line_A]
-    linez = [camera_A.camera_position[2,0], w_point_z_on_line_A]
+    linex = [camera_A.camera_position[0,0], w_point_on_line_A[0]]
+    liney = [camera_A.camera_position[1,0], w_point_on_line_A[1]]
+    linez = [camera_A.camera_position[2,0], w_point_on_line_A[2]]
     ax.plot(linex, liney, linez, "o-", color="#00aa00", ms=4, mew=0.5)
 
-    linex = [camera_B.camera_position[0,0], w_point_x_on_line_B]
-    liney = [camera_B.camera_position[1,0], w_point_y_on_line_B]
-    linez = [camera_B.camera_position[2,0], w_point_z_on_line_B]
+    linex = [camera_B.camera_position[0,0], w_point_on_line_B[0]]
+    liney = [camera_B.camera_position[1,0], w_point_on_line_B[1]]
+    linez = [camera_B.camera_position[2,0], w_point_on_line_B[2]]
     ax.plot(linex, liney, linez, "o-", color="#00aa00", ms=4, mew=0.5)
 
 
-    vecA = camera_A.camera_position-w_point_onscreenA
-    vecB = camera_B.camera_position-w_point_onscreenB
+    vecA = camera_A.vecs_PoV2objects([Ipoint_onimageA])[0]
+    vecB = camera_B.vecs_PoV2objects([Ipoint_onimageB])[0]
     cross = np.cross(vecA.T,vecB.T)
     cross = cross/np.linalg.norm(cross)
 

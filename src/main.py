@@ -16,12 +16,13 @@ def calc_corresponding_points(point_list_A, point_list_B, camera_A, camera_B):
     vecs_A = camera_A.vecs_PoV2objects(point_list_A)
     vecs_B = camera_B.vecs_PoV2objects(point_list_B)
 
+    vec_AB = camera_B.camera_position-camera_A.camera_position
+
+    # calc distance between 2vecs
     for idx_a, vec_A in enumerate(vecs_A):
         for idx_b, vec_B in enumerate(vecs_B):
             cross = np.cross(vec_A.T,vec_B.T)
             cross = cross/np.linalg.norm(cross)
-
-            vec_AB = camera_B.camera_position-camera_A.camera_position
 
             if np.abs(np.dot(cross, vec_AB)[0,0]) < MAX_DISTANCE:
                 pairs.append((point_list_A[idx_a], point_list_B[idx_b]))
