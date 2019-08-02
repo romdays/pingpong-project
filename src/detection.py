@@ -20,8 +20,8 @@ def detection(images):
     c_n_diff = cv2.absdiff(curr_img, next_img)
 
     # binarization
-    _, p_c_diff = cv2.threshold(p_c_diff,5,255, cv2.THRESH_BINARY)
-    _, c_n_diff = cv2.threshold(c_n_diff,5,255, cv2.THRESH_BINARY)
+    _, p_c_diff = cv2.threshold(p_c_diff,10,255, cv2.THRESH_BINARY)
+    _, c_n_diff = cv2.threshold(c_n_diff,10,255, cv2.THRESH_BINARY)
 
     # get moving object
     move_obj = c_n_diff*p_c_diff*255
@@ -29,6 +29,7 @@ def detection(images):
     # closing first
     kernel = np.ones((5,5),np.uint8)
     move_obj = cv2.morphologyEx(move_obj, cv2.MORPH_CLOSE, kernel)
+    mask = move_obj
 
     # extraction ping-pong color space
     move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
@@ -37,6 +38,7 @@ def detection(images):
 
     # closing second
     moving_and_white_obj = cv2.morphologyEx(moving_and_white_obj, cv2.MORPH_CLOSE, kernel)
+    moving_and_white_obj = mask
 
     # select candidates for ball object
     contours, hierarchy = cv2.findContours(moving_and_white_obj, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -74,22 +76,45 @@ def detection(images):
 
     for i, data in enumerate(info):
         text='area: {}, circularity: {}, (x,y): {}'.format(data[0], data[1], (data[2],data[3]))
-        cv2.putText(moving_and_white_obj, text, (10, 50*(i+1)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(moving_and_white_obj, text, (10, 50*(i+1)), cv2.FONT_HERSHEY_PLAIN, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
 
     cv2.imshow('detection2', moving_and_white_obj)
     cv2.imshow('detection', outframe)
+    hsv = cv2.cvtColor(images[1], cv2.COLOR_BGR2HSV)
+    msk = cv2.inRange(hsv, LOWER_COLOR, UPPER_COLOR)
+    cv2.imshow('detection3', move_obj)
 
-    return objs, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
+    return objs#, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
+
+def vsplit_ds_frame(image, shape):
+    width, height = shape
+    shape = image.shape
+    image = image[:, shape[1]//9:-shape[1]//9, :]
+    top, btm = np.vsplit(image, 2)
+    shape = top.shape
+
+    _height = shape[0]*width//shape[1]
+    top = cv2.resize(top,(width, _height))
+    btm = cv2.resize(btm,(width, _height))
+
+    margin = (height-_height)//2
+    black_top = cv2.resize(np.zeros((1, 1, 3), np.uint8), (width, height))
+    black_btm = cv2.resize(np.zeros((1, 1, 3), np.uint8), (width, height))
+    black_top[margin:-margin] = top
+    black_btm[margin:-margin] = btm
+
+    return black_top, black_btm
 
 
 if __name__ == '__main__':
     images = []
 
-    # cap = cv2.VideoCapture('./data/videos/003.mp4')
-    cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
+    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    # cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
 
     for i in range(FRAME_INTERVAL*2):
         ret, frame = cap.read()
+        frame, _ = vsplit_ds_frame(frame, (640, 480))
         images.append(frame)
         if frame is None:
             exit()
@@ -99,6 +124,7 @@ if __name__ == '__main__':
 
     while(cap.isOpened()):
         ret, frame = cap.read()
+        frame, _ = vsplit_ds_frame(frame, (640, 480))
         if frame is None:
             break
 

@@ -140,3 +140,4 @@ if __name__ == '__main__':
     vecAB = camera_A.camera_position-camera_B.camera_position
 
     plt.show()
+    # plt.pause(.01)
