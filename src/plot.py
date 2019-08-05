@@ -56,6 +56,12 @@ if __name__ == '__main__':
     ptlist = PointList(npoints)
     cv2.imshow('sourceA', img)
 
+    # # cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    # # # cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
+    # # from detection import vsplit_ds_frame
+    # # ret, frame = cap.read()
+    # # img, _ = vsplit_ds_frame(frame, (640, 480))
+
     # wname = "MouseEvent"
     # cv2.namedWindow(wname)
     # cv2.setMouseCallback(wname, onMouse, [wname, img, ptlist])

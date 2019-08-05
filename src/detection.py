@@ -89,7 +89,7 @@ def detection(images):
 def vsplit_ds_frame(image, shape):
     width, height = shape
     shape = image.shape
-    image = image[:, shape[1]//9:-shape[1]//9, :]
+    image = image[:, 277:-272, :]
     top, btm = np.vsplit(image, 2)
     shape = top.shape
 

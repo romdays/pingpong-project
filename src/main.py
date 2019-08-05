@@ -42,19 +42,6 @@ def triangulate(point_A, point_B, camera_A, camera_B):
     return world_point_projected
 
 def main():
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    from settings import (
-        TABLE_POINTS
-    )
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    x = [TABLE_POINTS[0,0], TABLE_POINTS[1,0], TABLE_POINTS[2,0], TABLE_POINTS[3,0]]
-    y = [TABLE_POINTS[0,1], TABLE_POINTS[1,1], TABLE_POINTS[2,1], TABLE_POINTS[3,1]]
-    z = [TABLE_POINTS[0,2], TABLE_POINTS[1,2], TABLE_POINTS[2,2], TABLE_POINTS[3,2]]
-    max_range = np.array([max(x)-min(x), max(y)-min(y), max(z)-min(z)]).max() * 1.5
-
-
     cameras = []
     images  = [[],[]]
     points  = []
@@ -72,14 +59,31 @@ def main():
             exit()
 
     # calib by marking 2 tables corners ------------------------------
-    points_of_corners_from_cameraA = [(83,204), (65,306), (520,304), (522,203)]
-    points_of_corners_from_cameraB = [(90,159), (96,262), (550,262), (529,159)]
+    points_of_corners_from_cameraA = [(83,204), (65,306), (520,304), (522,203)]# [[ 222, 403],
+        # [ 173, 694],
+        # [1474, 688],
+        # [1482, 396]]
+    points_of_corners_from_cameraB = [(90,159), (96,262), (550,262), (529,159)]# [[ 241, 276],
+        # [ 261, 567],
+        # [1562, 567],
+        # [1501, 277]]
 
     # get 2 camera params
     cameras.append(Camera(points_of_corners_from_cameraA))
     cameras.append(Camera(points_of_corners_from_cameraB))
 
-    
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    from settings import (
+        TABLE_POINTS
+    )
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    x = [TABLE_POINTS[0,0], TABLE_POINTS[1,0], TABLE_POINTS[2,0], TABLE_POINTS[3,0]]#, cameras[0].camera_position[0,0], cameras[1].camera_position[0,0]]
+    y = [TABLE_POINTS[0,1], TABLE_POINTS[1,1], TABLE_POINTS[2,1], TABLE_POINTS[3,1]]#, cameras[0].camera_position[1,0], cameras[1].camera_position[1,0]]
+    z = [TABLE_POINTS[0,2], TABLE_POINTS[1,2], TABLE_POINTS[2,2], TABLE_POINTS[3,2]]#, cameras[0].camera_position[2,0], cameras[1].camera_position[2,0]]
+    max_range = np.array([max(x)-min(x), max(y)-min(y), max(z)-min(z)]).max() * 1.5
+
     while(video.isOpened()):
         point_lists  = []
         top, btm = vsplit_ds_frame(frame, (640, 480))############
@@ -113,22 +117,17 @@ def main():
             points.append(np.array([[0.],[0.],[0.]]))
             # if no detected point, do interpolate
             cv2.waitKey(1)
-            continue
 
 
         ax.cla()
         ax.set_xlim(-max_range/2, max_range/2)
         ax.set_ylim(-max_range/2, max_range/2)
         ax.set_zlim(0, max_range)
-        x.append(points[-1][0,0])
-        y.append(points[-1][1,0])
-        z.append(points[-1][2,0])
         ax.scatter(x,y,z)
+        for p in cand:
+            ax.scatter(p[0,0],p[1,0],p[2,0])
 
         plt.pause(.01)
-        x.pop()
-        y.pop()
-        z.pop()
 
 
     video.release()
