@@ -44,19 +44,22 @@ def triangulate(point_A, point_B, camera_A, camera_B):
 def main():
     cameras = []
     images  = [[],[]]
+    mem_pairs = []
     points  = []
 
     # load 2 videos ------------------------------------------
     video = cv2.VideoCapture('./data/videos/ds/13.mov')
+    for i in range(330):
+        ret, frame = video.read()
 
     # detect feature point from 2 views
     for i in range(Settings.get('FRAME_INTERVAL')*2):
         ret, frame = video.read()
+        if frame is None:
+            exit()
         top, btm = vsplit_ds_frame(frame, (640, 480))#########
         images[0].append(top)
         images[1].append(btm)
-        if frame is None:
-            exit()
 
     # calib by marking 2 tables corners
     corners = np.load('./data/npz/corners.npz')
@@ -81,24 +84,17 @@ def main():
     cameras.append(Camera(points_of_corners[0]))
     cameras.append(Camera(points_of_corners[1]))
 
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    plot_points = []
-    for i in range(3):
-        plot_points.append([Settings.get('TABLE_POINTS')[0,i], Settings.get('TABLE_POINTS')[1,i], Settings.get('TABLE_POINTS')[2,i], Settings.get('TABLE_POINTS')[3,i]])#, cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]]
-    max_range = np.array([max(plot_points[0])-min(plot_points[0]), max(plot_points[1])-min(plot_points[1]), max(plot_points[2])-min(plot_points[2])]).max() * 1.5
+    from plot import PingpongPlot
+    outputter = PingpongPlot()
 
     while(video.isOpened()):
         point_lists  = []
-        top, btm = vsplit_ds_frame(frame, (640, 480))############
         ret, frame = video.read()
-        images[0].append(top)
-        images[1].append(btm)
         if frame is None:
             break
+        top, btm = vsplit_ds_frame(frame, (640, 480))############
+        images[0].append(top)
+        images[1].append(btm)
 
         point_lists.append(detection(images[0][0::Settings.get('FRAME_INTERVAL')])[0])
         point_lists.append(detection(images[1][0::Settings.get('FRAME_INTERVAL')])[0])
@@ -107,6 +103,8 @@ def main():
 
         # calc correspond objs
         pairs = calc_corresponding_points(point_lists[0], point_lists[1], cameras[0], cameras[1])
+        mem_pairs.append(pairs)
+        if len(mem_pairs)>5: mem_pairs.pop(0)
 
         # calc true pair point --------------------------------------------------------------------------------
 
@@ -123,16 +121,7 @@ def main():
             points.append(np.array([[0.],[0.],[0.]]))
             # if no detected point, do interpolate
 
-
-        ax.cla()
-        ax.set_xlim(-max_range/2, max_range/2)
-        ax.set_ylim(-max_range/2, max_range/2)
-        ax.set_zlim(0, max_range)
-        ax.scatter(plot_points[0],plot_points[1],plot_points[2])
-        for p in cand:
-            ax.scatter(p[0,0],p[1,0],p[2,0])
-
-        plt.pause(.01)
+        outputter.plot(cand)
 
 
     video.release()
