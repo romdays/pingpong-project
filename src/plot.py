@@ -2,10 +2,7 @@ import numpy as np
 import cv2 # Right-handed coordinate system
 # import matplotlib
 from camera import Camera
-
-from settings import (
-    TABLE_POINTS,
-)
+from settings import Settings
 
 class PointInfo():
     def __init__(self, npoints, img):
@@ -108,9 +105,9 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    x = [TABLE_POINTS[0,0], TABLE_POINTS[1,0], TABLE_POINTS[2,0], TABLE_POINTS[3,0], camera_A.camera_position[0,0], camera_B.camera_position[0,0], w_point_projected[0,0]]
-    y = [TABLE_POINTS[0,1], TABLE_POINTS[1,1], TABLE_POINTS[2,1], TABLE_POINTS[3,1], camera_A.camera_position[1,0], camera_B.camera_position[1,0], w_point_projected[1,0]]
-    z = [TABLE_POINTS[0,2], TABLE_POINTS[1,2], TABLE_POINTS[2,2], TABLE_POINTS[3,2], camera_A.camera_position[2,0], camera_B.camera_position[2,0], w_point_projected[2,0]]
+    x = [Settings.get('TABLE_POINTS')[0,0], Settings.get('TABLE_POINTS')[1,0], Settings.get('TABLE_POINTS')[2,0], Settings.get('TABLE_POINTS')[3,0], camera_A.camera_position[0,0], camera_B.camera_position[0,0], w_point_projected[0,0]]
+    y = [Settings.get('TABLE_POINTS')[0,1], Settings.get('TABLE_POINTS')[1,1], Settings.get('TABLE_POINTS')[2,1], Settings.get('TABLE_POINTS')[3,1], camera_A.camera_position[1,0], camera_B.camera_position[1,0], w_point_projected[1,0]]
+    z = [Settings.get('TABLE_POINTS')[0,2], Settings.get('TABLE_POINTS')[1,2], Settings.get('TABLE_POINTS')[2,2], Settings.get('TABLE_POINTS')[3,2], camera_A.camera_position[2,0], camera_B.camera_position[2,0], w_point_projected[2,0]]
 
     max_range = np.array([max(x)-min(x), max(y)-min(y), max(z)-min(z)]).max() * 1.5
 

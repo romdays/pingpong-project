@@ -4,7 +4,7 @@ import cv2
 class PointInfo():
     def __init__(self, npoints, img):
         self.npoints = npoints
-        self.points = np.empty((npoints, 2), dtype=float)
+        self.points = np.zeros((npoints, 2), dtype=float)
         self.pos = 0
         self.marker = []
         self.img = np.copy(img)
@@ -44,3 +44,14 @@ def onMouse(event, x, y, flags, param):
                 cv2.imshow(wname, p_info.img)
             else:
                 print('All points have selected.  Press ESC-key.')
+
+def mark_points_of_corners(image, npoints=4):
+    wname = "MouseEvent"
+    print('Mark the corners counterclockwise from the top left.')
+    p_info = PointInfo(npoints, image)
+    cv2.imshow(wname, image)
+    cv2.setMouseCallback(wname, onMouse, [wname, p_info])
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+    return p_info.points

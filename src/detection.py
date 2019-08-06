@@ -1,14 +1,7 @@
 import numpy as np
 import cv2
 
-from settings import (
-    MIN_CIRCULARITY,
-    MIN_COUNTOUR_AREA,
-    MAX_COUNTOUR_AREA,
-    FRAME_INTERVAL,
-    LOWER_COLOR,
-    UPPER_COLOR
-)
+from settings import Settings
 
 def detection(images):
     prev_img = cv2.blur(cv2.cvtColor(images[0], cv2.COLOR_BGR2GRAY), ksize=(5,5))
@@ -34,7 +27,7 @@ def detection(images):
     # extraction ping-pong color space
     move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
     hsv = cv2.cvtColor(move_obj, cv2.COLOR_BGR2HSV)
-    moving_and_white_obj = cv2.inRange(hsv, LOWER_COLOR, UPPER_COLOR)
+    moving_and_white_obj = cv2.inRange(hsv, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
 
     # closing second
     moving_and_white_obj = cv2.morphologyEx(moving_and_white_obj, cv2.MORPH_CLOSE, kernel)
@@ -52,8 +45,8 @@ def detection(images):
         mu = cv2.moments(cnt)
         area = mu["m00"] # cv2.contourArea(cnt)
         circularity = 4*np.pi*area/(arclen**2)
-        if (MIN_COUNTOUR_AREA<area and area<MAX_COUNTOUR_AREA \
-            and MIN_CIRCULARITY<circularity and circularity<1.0):
+        if (Settings.get('MIN_COUNTOUR_AREA')<area and area<Settings.get('MAX_COUNTOUR_AREA') \
+            and Settings.get('MIN_CIRCULARITY')<circularity and circularity<1.0):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
 
             objs.append((x,y))
@@ -81,7 +74,7 @@ def detection(images):
     cv2.imshow('detection2', moving_and_white_obj)
     cv2.imshow('detection', outframe)
     hsv = cv2.cvtColor(images[1], cv2.COLOR_BGR2HSV)
-    msk = cv2.inRange(hsv, LOWER_COLOR, UPPER_COLOR)
+    msk = cv2.inRange(hsv, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
     cv2.imshow('detection3', move_obj)
 
     return objs, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
@@ -112,7 +105,7 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture('./data/videos/ds/13.mov')
     # cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
 
-    for i in range(FRAME_INTERVAL*2):
+    for i in range(Settings.get('FRAME_INTERVAL')*2):
         ret, frame = cap.read()
         frame, _ = vsplit_ds_frame(frame, (640, 480))
         images.append(frame)
@@ -129,7 +122,7 @@ if __name__ == '__main__':
             break
 
         images.append(frame)
-        obj, img = detection(images[0::FRAME_INTERVAL])
+        obj, img = detection(images[0::Settings.get('FRAME_INTERVAL')])
         images.pop(0)
 
         out.write(img)

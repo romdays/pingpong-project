@@ -1,23 +1,20 @@
 import numpy as np
 import cv2 
+from settings import Settings
 
-from settings import (
-    CALIB_PARAM,
-    TABLE_POINTS,
-)
 
 class Camera():
     def __init__(self, points_on_image):
-        self.camera_matrix = CALIB_PARAM['cameraMatrix']
+        self.camera_matrix = Settings.get('CALIB_PARAM')['cameraMatrix']
         self.camera_matrix[0,0] = self.camera_matrix[0,0]*2.3
         self.camera_matrix[1,1] = self.camera_matrix[1,1]*2.3
         # self.camera_matrix[0,0] = self.camera_matrix[0,0]*1811/640*1.2
         # self.camera_matrix[1,1] = self.camera_matrix[1,1]*1010/480*1.2
-        self.dist_coeffs = np.zeros((1,5)) # CALIB_PARAM['distCoeffs']
+        self.dist_coeffs = np.zeros((1,5)) # Settings.get('CALIB_PARAM')['distCoeffs']
 
         points_on_image = np.asarray(points_on_image).astype(float)
 
-        ret, self.rvec, self.tvec = cv2.solvePnP(TABLE_POINTS, points_on_image, self.camera_matrix, None)# self.dist_coeffs)
+        ret, self.rvec, self.tvec = cv2.solvePnP(Settings.get('TABLE_POINTS'), points_on_image, self.camera_matrix, None)# self.dist_coeffs)
 
         self.rmat = cv2.Rodrigues(self.rvec)[0]
         self.camera_position = -np.matrix(self.rmat).T * np.matrix(self.tvec)

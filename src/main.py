@@ -1,16 +1,14 @@
 import numpy as np
 import cv2
 import re
+
 from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
-from corner import PointInfo
-from corner import onMouse
+from corner import mark_points_of_corners
 
-from settings import (
-    MAX_DISTANCE,
-    FRAME_INTERVAL, 
-)
+from settings import Settings
+
 
 def calc_corresponding_points(point_list_A, point_list_B, camera_A, camera_B):
     pairs = []
@@ -27,7 +25,7 @@ def calc_corresponding_points(point_list_A, point_list_B, camera_A, camera_B):
             cross = np.cross(vec_A.T,vec_B.T)
             cross = cross/np.linalg.norm(cross)
 
-            if np.abs(np.dot(cross, vec_AB)[0,0]) < MAX_DISTANCE:
+            if np.abs(np.dot(cross, vec_AB)[0,0]) < Settings.get('MAX_DISTANCE'):
                 pairs.append((point_list_A[idx_a], point_list_B[idx_b]))
     
     return pairs
@@ -52,7 +50,7 @@ def main():
     video = cv2.VideoCapture('./data/videos/ds/13.mov')
 
     # detect feature point from 2 views
-    for i in range(FRAME_INTERVAL*2):
+    for i in range(Settings.get('FRAME_INTERVAL')*2):
         ret, frame = video.read()
         top, btm = vsplit_ds_frame(frame, (640, 480))#########
         images[0].append(top)
@@ -60,48 +58,37 @@ def main():
         if frame is None:
             exit()
 
-    # calib by marking 2 tables corners ------------------------------
+    # calib by marking 2 tables corners
     corners = np.load('./data/npz/corners.npz')
     points_of_corners = [corners['first'], corners['second']]
-    
-    npoints = 4
-    wname = "MouseEvent"
     for i in range(2):
         tmp_img = np.copy(images[i][0])
         for p in points_of_corners[i]:
             cv2.circle(tmp_img, (int(p[0]), int(p[1])), 3, (0, 0, 255), 3)
         print('Use these points as corners ? [y/N]')
-        cv2.imshow(wname, tmp_img)
+        cv2.imshow('check the corner', tmp_img)
         while True:
             key = cv2.waitKey() & 0xFF
             if re.match(r'n', chr(key), re.IGNORECASE):
-                p_info = PointInfo(npoints, images[i][0])
-                cv2.namedWindow(wname)
-                cv2.setMouseCallback(wname, onMouse, [wname, p_info])
-                cv2.imshow(wname, images[i][0])
-                cv2.waitKey()
-                cv2.destroyAllWindows()
-                if p_info.pos == npoints:
-                    points_of_corners[i] = p_info.points
-                    np.savez('./data/npz/corners', first = points_of_corners[0], second = points_of_corners[1])
+                points_of_corners[i] = mark_points_of_corners(images[i][0])
+                np.savez('./data/npz/corners', first = points_of_corners[0], second = points_of_corners[1])
                 break
             elif re.match(r'y', chr(key), re.IGNORECASE):
                 break
-
+        cv2.destroyAllWindows()
+    
     # get 2 camera params
     cameras.append(Camera(points_of_corners[0]))
     cameras.append(Camera(points_of_corners[1]))
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
-    from settings import (
-        TABLE_POINTS
-    )
+
     fig = plt.figure()
     ax = Axes3D(fig)
     plot_points = []
     for i in range(3):
-        plot_points.append([TABLE_POINTS[0,i], TABLE_POINTS[1,i], TABLE_POINTS[2,i], TABLE_POINTS[3,i]])#, cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]]
+        plot_points.append([Settings.get('TABLE_POINTS')[0,i], Settings.get('TABLE_POINTS')[1,i], Settings.get('TABLE_POINTS')[2,i], Settings.get('TABLE_POINTS')[3,i]])#, cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]]
     max_range = np.array([max(plot_points[0])-min(plot_points[0]), max(plot_points[1])-min(plot_points[1]), max(plot_points[2])-min(plot_points[2])]).max() * 1.5
 
     while(video.isOpened()):
@@ -113,9 +100,8 @@ def main():
         if frame is None:
             break
 
-            
-        point_lists.append(detection(images[0][0::FRAME_INTERVAL])[0])
-        point_lists.append(detection(images[1][0::FRAME_INTERVAL])[0])
+        point_lists.append(detection(images[0][0::Settings.get('FRAME_INTERVAL')])[0])
+        point_lists.append(detection(images[1][0::Settings.get('FRAME_INTERVAL')])[0])
         images[0].pop(0)
         images[1].pop(0)
 
@@ -136,7 +122,6 @@ def main():
         else:
             points.append(np.array([[0.],[0.],[0.]]))
             # if no detected point, do interpolate
-            cv2.waitKey(1)
 
 
         ax.cla()
