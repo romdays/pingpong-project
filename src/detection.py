@@ -22,16 +22,15 @@ def detection(images):
     # closing first
     kernel = np.ones((5,5),np.uint8)
     move_obj = cv2.morphologyEx(move_obj, cv2.MORPH_CLOSE, kernel)
-    mask = move_obj
+    moving_and_white_obj = move_obj
 
-    # extraction ping-pong color space
-    move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
-    hsv = cv2.cvtColor(move_obj, cv2.COLOR_BGR2HSV)
-    moving_and_white_obj = cv2.inRange(hsv, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
+    # # extraction ping-pong color space
+    # move_obj = cv2.bitwise_and(images[1], images[1], mask=move_obj)
+    # hsv = cv2.cvtColor(move_obj, cv2.COLOR_BGR2HSV)
+    # moving_and_white_obj = cv2.inRange(hsv, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
 
-    # closing second
-    moving_and_white_obj = cv2.morphologyEx(moving_and_white_obj, cv2.MORPH_CLOSE, kernel)
-    moving_and_white_obj = mask
+    # # closing second
+    # moving_and_white_obj = cv2.morphologyEx(moving_and_white_obj, cv2.MORPH_CLOSE, kernel)
 
     # select candidates for ball object
     contours, hierarchy = cv2.findContours(moving_and_white_obj, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -45,7 +44,7 @@ def detection(images):
         mu = cv2.moments(cnt)
         area = mu["m00"] # cv2.contourArea(cnt)
         circularity = 4*np.pi*area/(arclen**2)
-        if (Settings.get('MIN_COUNTOUR_AREA')<area and area<Settings.get('MAX_COUNTOUR_AREA') \
+        if (Settings.get('MIN_CONTOUR_AREA')<area and area<Settings.get('MAX_CONTOUR_AREA') \
             and Settings.get('MIN_CIRCULARITY')<circularity and circularity<1.0):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
 
@@ -73,8 +72,6 @@ def detection(images):
 
     cv2.imshow('detection2', moving_and_white_obj)
     cv2.imshow('detection', outframe)
-    hsv = cv2.cvtColor(images[1], cv2.COLOR_BGR2HSV)
-    msk = cv2.inRange(hsv, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
     cv2.imshow('detection3', move_obj)
 
     return objs, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
@@ -102,12 +99,12 @@ def vsplit_ds_frame(image, shape):
 if __name__ == '__main__':
     images = []
 
-    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
-    # cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
+    # cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
 
     for i in range(Settings.get('FRAME_INTERVAL')*2):
         ret, frame = cap.read()
-        frame, _ = vsplit_ds_frame(frame, (640, 480))
+        # frame, _ = vsplit_ds_frame(frame, (640, 480))
         images.append(frame)
         if frame is None:
             exit()
@@ -117,7 +114,7 @@ if __name__ == '__main__':
 
     while(cap.isOpened()):
         ret, frame = cap.read()
-        frame, _ = vsplit_ds_frame(frame, (640, 480))
+        # frame, _ = vsplit_ds_frame(frame, (640, 480))
         if frame is None:
             break
 

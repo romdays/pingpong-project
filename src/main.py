@@ -42,6 +42,8 @@ def triangulate(point_A, point_B, camera_A, camera_B):
     return world_point_projected
 
 def main():
+    image_shape = (640, 480)
+    Settings(image_shape)
     cameras = []
     images  = [[],[]]
     mem_pairs = []
@@ -57,7 +59,7 @@ def main():
         ret, frame = video.read()
         if frame is None:
             exit()
-        top, btm = vsplit_ds_frame(frame, (640, 480))#########
+        top, btm = vsplit_ds_frame(frame, image_shape)#########
         images[0].append(top)
         images[1].append(btm)
 
@@ -92,7 +94,7 @@ def main():
         ret, frame = video.read()
         if frame is None:
             break
-        top, btm = vsplit_ds_frame(frame, (640, 480))############
+        top, btm = vsplit_ds_frame(frame, image_shape)############
         images[0].append(top)
         images[1].append(btm)
 

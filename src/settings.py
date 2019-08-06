@@ -21,12 +21,17 @@ class Settings():
         'UPPER_COLOR': np.array([10,50,255]),
 
         'MIN_CIRCULARITY': 0.5,
-        'MIN_COUNTOUR_AREA': 20,
-        'MAX_COUNTOUR_AREA': 50,
+        'MIN_CONTOUR_AREA': None,
+        'MAX_CONTOUR_AREA': None,
 
         'MAX_DISTANCE': 30, # cm
 
         }
+    
+    def __init__(self, image_shape):
+        pixels = image_shape[0]*image_shape[1]
+        self.update('MIN_CONTOUR_AREA', pixels/(11**4))
+        self.update('MAX_CONTOUR_AREA', pixels/(8.2**4))
 
     @classmethod
     def get(cls, key):
@@ -35,3 +40,5 @@ class Settings():
     @classmethod
     def update(cls, key, value):
         cls.__settings[key] = value
+        print(cls.__settings[key])
+
