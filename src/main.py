@@ -3,6 +3,8 @@ import cv2
 from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
+from corner import PointInfo
+from corner import onMouse
 
 from settings import (
     CALIB_PARAM,
@@ -59,18 +61,30 @@ def main():
             exit()
 
     # calib by marking 2 tables corners ------------------------------
-    points_of_corners_from_cameraA = [(83,204), (65,306), (520,304), (522,203)]# [[ 222, 403],
+    points_of_corners_from_camera = []
+    # npoints = 4
+    # wname = "MouseEvent"
+    # for i in range(2):
+    #     p_info = PointInfo(npoints, images[i][0])
+    #     cv2.namedWindow(wname)
+    #     cv2.setMouseCallback(wname, onMouse, [wname, p_info])
+    #     cv2.imshow(wname, images[i][0])
+    #     cv2.waitKey()
+    #     cv2.destroyAllWindows()
+    #     points_of_corners_from_camera.append(p_info.points)
+
+    points_of_corners_from_camera.append([(83,204), (65,306), (520,304), (522,203)])# [[ 222, 403],
         # [ 173, 694],
         # [1474, 688],
         # [1482, 396]]
-    points_of_corners_from_cameraB = [(90,159), (96,262), (550,262), (529,159)]# [[ 241, 276],
+    points_of_corners_from_camera.append([(90,159), (96,262), (550,262), (529,159)])# [[ 241, 276],
         # [ 261, 567],
         # [1562, 567],
         # [1501, 277]]
 
     # get 2 camera params
-    cameras.append(Camera(points_of_corners_from_cameraA))
-    cameras.append(Camera(points_of_corners_from_cameraB))
+    cameras.append(Camera(points_of_corners_from_camera[0]))
+    cameras.append(Camera(points_of_corners_from_camera[1]))
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
