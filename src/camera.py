@@ -8,7 +8,6 @@ from settings import (
 
 class Camera():
     def __init__(self, points_on_image):
-        CALIB_PARAM = np.load('./data/npz/calib.npz')
         self.camera_matrix = CALIB_PARAM['cameraMatrix']
         self.camera_matrix[0,0] = self.camera_matrix[0,0]*2.3
         self.camera_matrix[1,1] = self.camera_matrix[1,1]*2.3

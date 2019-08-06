@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import re
 from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
@@ -7,7 +8,6 @@ from corner import PointInfo
 from corner import onMouse
 
 from settings import (
-    CALIB_PARAM,
     MAX_DISTANCE,
     FRAME_INTERVAL, 
 )
@@ -61,30 +61,36 @@ def main():
             exit()
 
     # calib by marking 2 tables corners ------------------------------
-    points_of_corners_from_camera = []
-    # npoints = 4
-    # wname = "MouseEvent"
-    # for i in range(2):
-    #     p_info = PointInfo(npoints, images[i][0])
-    #     cv2.namedWindow(wname)
-    #     cv2.setMouseCallback(wname, onMouse, [wname, p_info])
-    #     cv2.imshow(wname, images[i][0])
-    #     cv2.waitKey()
-    #     cv2.destroyAllWindows()
-    #     points_of_corners_from_camera.append(p_info.points)
-
-    points_of_corners_from_camera.append([(83,204), (65,306), (520,304), (522,203)])# [[ 222, 403],
-        # [ 173, 694],
-        # [1474, 688],
-        # [1482, 396]]
-    points_of_corners_from_camera.append([(90,159), (96,262), (550,262), (529,159)])# [[ 241, 276],
-        # [ 261, 567],
-        # [1562, 567],
-        # [1501, 277]]
+    corners = np.load('./data/npz/corners.npz')
+    points_of_corners = [corners['first'], corners['second']]
+    
+    npoints = 4
+    wname = "MouseEvent"
+    for i in range(2):
+        tmp_img = np.copy(images[i][0])
+        for p in points_of_corners[i]:
+            cv2.circle(tmp_img, (int(p[0]), int(p[1])), 3, (0, 0, 255), 3)
+        print('Use these points as corners ? [y/N]')
+        cv2.imshow(wname, tmp_img)
+        while True:
+            key = cv2.waitKey() & 0xFF
+            if re.match(r'n', chr(key), re.IGNORECASE):
+                p_info = PointInfo(npoints, images[i][0])
+                cv2.namedWindow(wname)
+                cv2.setMouseCallback(wname, onMouse, [wname, p_info])
+                cv2.imshow(wname, images[i][0])
+                cv2.waitKey()
+                cv2.destroyAllWindows()
+                if p_info.pos == npoints:
+                    points_of_corners[i] = p_info.points
+                    np.savez('./data/npz/corners', first = points_of_corners[0], second = points_of_corners[1])
+                break
+            elif re.match(r'y', chr(key), re.IGNORECASE):
+                break
 
     # get 2 camera params
-    cameras.append(Camera(points_of_corners_from_camera[0]))
-    cameras.append(Camera(points_of_corners_from_camera[1]))
+    cameras.append(Camera(points_of_corners[0]))
+    cameras.append(Camera(points_of_corners[1]))
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
@@ -93,10 +99,10 @@ def main():
     )
     fig = plt.figure()
     ax = Axes3D(fig)
-    x = [TABLE_POINTS[0,0], TABLE_POINTS[1,0], TABLE_POINTS[2,0], TABLE_POINTS[3,0]]#, cameras[0].camera_position[0,0], cameras[1].camera_position[0,0]]
-    y = [TABLE_POINTS[0,1], TABLE_POINTS[1,1], TABLE_POINTS[2,1], TABLE_POINTS[3,1]]#, cameras[0].camera_position[1,0], cameras[1].camera_position[1,0]]
-    z = [TABLE_POINTS[0,2], TABLE_POINTS[1,2], TABLE_POINTS[2,2], TABLE_POINTS[3,2]]#, cameras[0].camera_position[2,0], cameras[1].camera_position[2,0]]
-    max_range = np.array([max(x)-min(x), max(y)-min(y), max(z)-min(z)]).max() * 1.5
+    plot_points = []
+    for i in range(3):
+        plot_points.append([TABLE_POINTS[0,i], TABLE_POINTS[1,i], TABLE_POINTS[2,i], TABLE_POINTS[3,i]])#, cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]]
+    max_range = np.array([max(plot_points[0])-min(plot_points[0]), max(plot_points[1])-min(plot_points[1]), max(plot_points[2])-min(plot_points[2])]).max() * 1.5
 
     while(video.isOpened()):
         point_lists  = []
@@ -108,8 +114,8 @@ def main():
             break
 
             
-        point_lists.append(detection(images[0][0::FRAME_INTERVAL]))
-        point_lists.append(detection(images[1][0::FRAME_INTERVAL]))
+        point_lists.append(detection(images[0][0::FRAME_INTERVAL])[0])
+        point_lists.append(detection(images[1][0::FRAME_INTERVAL])[0])
         images[0].pop(0)
         images[1].pop(0)
 
@@ -137,7 +143,7 @@ def main():
         ax.set_xlim(-max_range/2, max_range/2)
         ax.set_ylim(-max_range/2, max_range/2)
         ax.set_zlim(0, max_range)
-        ax.scatter(x,y,z)
+        ax.scatter(plot_points[0],plot_points[1],plot_points[2])
         for p in cand:
             ax.scatter(p[0,0],p[1,0],p[2,0])
 

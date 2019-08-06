@@ -84,7 +84,7 @@ def detection(images):
     msk = cv2.inRange(hsv, LOWER_COLOR, UPPER_COLOR)
     cv2.imshow('detection3', move_obj)
 
-    return objs#, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
+    return objs, np.concatenate((outframe, moving_and_white_obj), axis=0).astype(np.uint8)
 
 def vsplit_ds_frame(image, shape):
     width, height = shape

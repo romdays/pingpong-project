@@ -1,11 +1,5 @@
 import numpy as np
-import cv2 # Right-handed coordinate system
-# import matplotlib
-from camera import Camera
-
-from settings import (
-    TABLE_POINTS,
-)
+import cv2 
 
 class PointInfo():
     def __init__(self, npoints, img):
