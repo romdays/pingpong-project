@@ -98,8 +98,8 @@ def main():
         images[0].append(top)
         images[1].append(btm)
 
-        point_lists.append(detection(images[0][0::Settings.get('FRAME_INTERVAL')])[0])
-        point_lists.append(detection(images[1][0::Settings.get('FRAME_INTERVAL')])[0])
+        point_lists.append(detection(images[0][0::Settings.get('FRAME_INTERVAL')]))
+        point_lists.append(detection(images[1][0::Settings.get('FRAME_INTERVAL')]))
         images[0].pop(0)
         images[1].pop(0)
 
