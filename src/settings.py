@@ -20,7 +20,7 @@ class Settings():
         'LOWER_COLOR': np.array([0,0,50]),
         'UPPER_COLOR': np.array([10,50,255]),
 
-        'MIN_CIRCULARITY': 0.5,
+        'MIN_CIRCULARITY': 0.75,
         'MIN_CONTOUR_AREA': None,
         'MAX_CONTOUR_AREA': None,
 

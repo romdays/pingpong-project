@@ -33,7 +33,7 @@ def calc_corresponding_points(point_list_A, point_list_B, camera_A, camera_B):
 def calc_closest_point_in_pairs(pairs):
     if len(pairs)==0: return []
     distance = [pair[0]**2 + pair[1]**2 for pair in pairs]
-    return pairs[distance.index(max(distance))]
+    return pairs[distance.index(min(distance))]
 
 def triangulate(point_A, point_B, camera_A, camera_B):
     world_point_projected = cv2.triangulatePoints(camera_A.projection_matrix, camera_B.projection_matrix, point_A, point_B)
@@ -50,13 +50,15 @@ def main():
     points  = []
 
     # load 2 videos ------------------------------------------
-    video = cv2.VideoCapture('./data/videos/ds/13.mov')
+    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    FRAME_INTERVAL = 3#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
+    
     for i in range(330):
-        ret, frame = video.read()
+        ret, frame = cap.read()
 
     # detect feature point from 2 views
-    for i in range(Settings.get('FRAME_INTERVAL')*2):
-        ret, frame = video.read()
+    for i in range(FRAME_INTERVAL*2):
+        ret, frame = cap.read()
         if frame is None:
             exit()
         for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
@@ -87,14 +89,14 @@ def main():
     from plot import PingpongPlot
     outputter = PingpongPlot()
 
-    while(video.isOpened()):
-        ret, frame = video.read()
+    while(cap.isOpened()):
+        ret, frame = cap.read()
         if frame is None:
             break
         
         for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
             images[i].append(image)
-            detected[i].append(detection(images[i][0::Settings.get('FRAME_INTERVAL')]))
+            detected[i].append(detection(images[i][0::FRAME_INTERVAL]))
             images[i].pop(0)
 
         # calc correspond objs
@@ -112,13 +114,16 @@ def main():
             points.append(calc_closest_point_in_pairs(cand))
 
         else:
-            points.append(np.array([[0.],[0.],[0.]]))
+            points.append(np.array([[0.],[0.],[76.]]))
             # if no detected point, do interpolate
 
+        from selection import calc_closest_point
+        if len(points)>10:
+            calc_closest_point(points[-2], [points[-1]])
         outputter.plot(cand)
 
 
-    video.release()
+    cap.release()
 
 
 if __name__ == '__main__':

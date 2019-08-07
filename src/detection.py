@@ -67,6 +67,8 @@ def detection(images):
         )
 
     # debug
+    mask=np.expand_dims(mask, axis=2)
+    mask=np.concatenate([mask]*3, axis=2)
     lst = [i[0] for i in info]
     if len(info)==1:
         cv2.drawContours(images[1],lst,-1,(0,255,0),-3)
@@ -81,9 +83,9 @@ def detection(images):
 
     cv2.imshow('detection2', mask)
     cv2.imshow('detection', images[1])
-    cv2.imshow('detection3', masked_img)
+    # cv2.imshow('detection3', masked_img)
 
-    return points
+    return points#, np.concatenate((images[1], mask), axis=0).astype(np.uint8)
 
 def vsplit_ds_frame(image, shape):
     width, height = shape
@@ -107,13 +109,18 @@ def vsplit_ds_frame(image, shape):
 
 if __name__ == '__main__':
     images = []
+    image_shape = (640, 480)
+    Settings(image_shape)
 
-    # cap = cv2.VideoCapture('./data/videos/ds/13.mov')
-    cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
+    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    # cap = cv2.VideoCapture('./data/videos/DCIM/100MEDIA/DJI_0022.MP4')
+    for i in range(330):
+        ret, frame = cap.read()
+        
 
     for i in range(Settings.get('FRAME_INTERVAL')*2):
         ret, frame = cap.read()
-        # frame, _ = vsplit_ds_frame(frame, (640, 480))
+        frame, _ = vsplit_ds_frame(frame, image_shape)
         images.append(frame)
         if frame is None:
             exit()
@@ -123,7 +130,7 @@ if __name__ == '__main__':
 
     while(cap.isOpened()):
         ret, frame = cap.read()
-        # frame, _ = vsplit_ds_frame(frame, (640, 480))
+        frame, _ = vsplit_ds_frame(frame, image_shape)
         if frame is None:
             break
 
@@ -133,8 +140,10 @@ if __name__ == '__main__':
 
         # out.write(img)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(100) & 0xFF == ord('q'):
             break
+
+        print(len(obj))
 
     cap.release()
     # out.release()
