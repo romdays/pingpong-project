@@ -46,7 +46,7 @@ def main():
     Settings(image_shape)
     cameras = []
     images  = [[],[]]
-    mem_pairs = []
+    detected = [[],[]]
     points  = []
 
     # load 2 videos ------------------------------------------
@@ -59,9 +59,8 @@ def main():
         ret, frame = video.read()
         if frame is None:
             exit()
-        top, btm = vsplit_ds_frame(frame, image_shape)#########
-        images[0].append(top)
-        images[1].append(btm)
+        for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
+            images[i].append(image)
 
     # calib by marking 2 tables corners
     corners = np.load('./data/npz/corners.npz')
@@ -81,32 +80,25 @@ def main():
             elif re.match(r'y', chr(key), re.IGNORECASE):
                 break
         cv2.destroyAllWindows()
-    
-    # get 2 camera params
-    cameras.append(Camera(points_of_corners[0]))
-    cameras.append(Camera(points_of_corners[1]))
+
+        # get camera params
+        cameras.append(Camera(points_of_corners[i]))
 
     from plot import PingpongPlot
     outputter = PingpongPlot()
 
     while(video.isOpened()):
-        point_lists  = []
         ret, frame = video.read()
         if frame is None:
             break
-        top, btm = vsplit_ds_frame(frame, image_shape)############
-        images[0].append(top)
-        images[1].append(btm)
-
-        point_lists.append(detection(images[0][0::Settings.get('FRAME_INTERVAL')]))
-        point_lists.append(detection(images[1][0::Settings.get('FRAME_INTERVAL')]))
-        images[0].pop(0)
-        images[1].pop(0)
+        
+        for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
+            images[i].append(image)
+            detected[i].append(detection(images[i][0::Settings.get('FRAME_INTERVAL')]))
+            images[i].pop(0)
 
         # calc correspond objs
-        pairs = calc_corresponding_points(point_lists[0], point_lists[1], cameras[0], cameras[1])
-        mem_pairs.append(pairs)
-        if len(mem_pairs)>5: mem_pairs.pop(0)
+        pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
 

@@ -41,4 +41,4 @@ class PingpongPlot():
         for p in points:
             self.ax.scatter(p[0,0],p[1,0],p[2,0])
 
-        plt.pause(.01)
+        plt.pause(.0001)
