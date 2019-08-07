@@ -40,5 +40,4 @@ class Settings():
     @classmethod
     def update(cls, key, value):
         cls.__settings[key] = value
-        print(cls.__settings[key])
 

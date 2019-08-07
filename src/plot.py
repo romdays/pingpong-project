@@ -17,11 +17,13 @@ class PingpongPlot():
         TABLE_WIDTH = 152.5 # cm
         TABLE_LENGTH = 274.0 # cm
         TABLE_HEIGHT = 76.0
+        # table
         x = np.linspace(-TABLE_LENGTH/2,TABLE_LENGTH/2,11)
         y = np.linspace(-TABLE_WIDTH/2,TABLE_WIDTH/2,11)
         z = TABLE_HEIGHT
         self.X1,self.Y1 = np.meshgrid(x,y)
         self.Z1 = np.array([[z]]*self.X1.shape[0])
+        # net 
         x = 0
         y = np.linspace(-TABLE_WIDTH/1.9,TABLE_WIDTH/1.9,11)
         z = np.linspace(TABLE_HEIGHT,TABLE_HEIGHT+TABLE_WIDTH/10,11)
