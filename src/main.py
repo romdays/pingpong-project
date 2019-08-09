@@ -55,7 +55,7 @@ def main():
 
     # load 2 videos ------------------------------------------
     cap = cv2.VideoCapture('./data/videos/ds/13.mov')
-    FRAME_INTERVAL = 3#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
+    FRAME_INTERVAL = 4#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
     
     for i in range(int(60*5.5)):
         ret, frame = cap.read()
@@ -109,8 +109,8 @@ def main():
             holder[i].append([])
 
         # calc correspond objs
-        # pairs = calc_corresponding_points(holder[0].pop(0), holder[1].pop(0), cameras[0], cameras[1])
-        pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
+        pairs = calc_corresponding_points(holder[0].pop(0), holder[1].pop(0), cameras[0], cameras[1])
+        # pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ def main():
         # outputter.plot(balls)
 
 
-    np.savez('./data/npz/points', points = points, points_seq = points_seq)
+    # np.savez('./data/npz/points', points = points, points_seq = points_seq)
     cap.release()
 
 

@@ -31,7 +31,7 @@ def mask_hsv_color_space(image, lower, upper):
 
     # closing
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5,5),np.uint8))
-    
+
     return mask
 
 def detect_circular_obj_points_from_binary_image(image, min_circularity, min_contour_area, max_contour_ara):
@@ -83,7 +83,7 @@ def detection(images):
 
     cv2.imshow('detection2', mask)
     cv2.imshow('detection', images[1])
-    # cv2.imshow('detection3', masked_img)
+    cv2.imshow('detection3', masked_img)
 
     return points#, np.concatenate((images[1], mask), axis=0).astype(np.uint8)
 
@@ -101,8 +101,8 @@ def vsplit_ds_frame(image, shape):
     margin = (height-_height)//2
     black_top = cv2.resize(np.zeros((1, 1, 3), np.uint8), (width, height))
     black_btm = cv2.resize(np.zeros((1, 1, 3), np.uint8), (width, height))
-    black_top[margin:-margin] = top
-    black_btm[margin:-margin] = btm
+    black_top[margin:margin+top.shape[0]] = top
+    black_btm[margin:margin+btm.shape[0]] = btm
 
     return black_top, black_btm
 

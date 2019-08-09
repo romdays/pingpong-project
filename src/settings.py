@@ -17,21 +17,22 @@ class Settings():
             ( TABLE_LENGTH/2,  TABLE_WIDTH/2, TABLE_HEIGHT),
             ]),
 
+        'GAMMA': 1.3,
         'LOWER_COLOR': np.array([0,0,50]),
         'UPPER_COLOR': np.array([10,50,255]),
 
-        'MIN_CIRCULARITY': 0.75,
+        'MIN_CIRCULARITY': 0.5,
         'MIN_CONTOUR_AREA': None,
         'MAX_CONTOUR_AREA': None,
 
-        'MAX_DISTANCE': 30, # cm
+        'MAX_DISTANCE': 10, # cm
 
         }
     
     def __init__(self, image_shape):
         pixels = image_shape[0]*image_shape[1]
         self.update('MIN_CONTOUR_AREA', pixels/(11.5**4))
-        self.update('MAX_CONTOUR_AREA', pixels/(8.2**4))
+        self.update('MAX_CONTOUR_AREA', pixels/(8.**4))
 
     @classmethod
     def get(cls, key):
