@@ -48,8 +48,9 @@ def main():
     images  = [[],[]]
     detected = [[],[]]
     points  = []
+    points_seq = []
 
-    check_frame_length = 6
+    check_frame_length = 7
     holder = [[[] for i in range(check_frame_length)] for i in range(3)]
 
     # load 2 videos ------------------------------------------
@@ -108,30 +109,27 @@ def main():
             holder[i].append([])
 
         # calc correspond objs
-        pairs = calc_corresponding_points(holder[0].pop(0), holder[1].pop(0), cameras[0], cameras[1])
-        # pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
+        # pairs = calc_corresponding_points(holder[0].pop(0), holder[1].pop(0), cameras[0], cameras[1])
+        pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
 
-        cand = []
+        balls = []
         for pair in pairs:
-            cand.append(triangulate(pair[0], pair[1], cameras[0], cameras[1]))
+            balls.append(triangulate(pair[0], pair[1], cameras[0], cameras[1]))
 
-        if len(cand)>0:
-            # get 3d point 
-            points.append(cand)
+        # get 3d point 
+        points_seq.append(balls)
 
-        else:
-            points.append([])
-            # if no detected point, do interpolate
 
-        holder[2] = selection(points[-check_frame_length:], holder[2])
+        holder[2] = selection(points_seq[-check_frame_length:], holder[2])
         holder[2].append([])
-        outputter.plot(holder[2].pop(0))
-        # outputter.plot(cand)
+        points.append(holder[2].pop(0))
+        outputter.plot(points[-1])
+        # outputter.plot(balls)
 
 
-
+    np.savez('./data/npz/points', points = points, points_seq = points_seq)
     cap.release()
 
 

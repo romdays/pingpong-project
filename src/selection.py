@@ -4,7 +4,7 @@ import itertools
 
 from settings import Settings
 
-def similar_vecs(v1, v2, similarlity=0.8):
+def similar_vecs(v1, v2, similarlity=0.95):
     v1_norm = np.linalg.norm(v1)
     v2_norm = np.linalg.norm(v2)
     if not v1_norm or not v2_norm: return False
@@ -25,12 +25,9 @@ def selection(points_seq, holder):
             v2 = (after-middle)/(k-j)
             if similar_vecs(v1, v2):
                 for bar in foo:
-                    if (i,j,k)==bar[1]:
-                        continue
-                    elif similar_vecs(v1, bar[2][0]) and similar_vecs(v2, bar[2][1]):
-                        if not any([np.all(before==p) for p in holder[i]]): holder[i].append(before)
-                        if not any([np.all(middle==p) for p in holder[j]]): holder[j].append(middle)
-                        if not any([np.all(after==p) for p in holder[k]]): holder[k].append(after)
+                    if sum(n in (i,j,k) for n in bar[1]) == 2 and similar_vecs(v1, bar[2][0]) and similar_vecs(v2, bar[2][1]):
+                        for val, num in zip((before, middle, after)+bar[0], (i,j,k)+bar[1]):
+                            if not any([np.all(val==p) for p in holder[num]]): holder[num].append(val)
 
                 foo.append(((before, middle, after), (i,j,k), (v1, v2)))
 

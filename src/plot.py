@@ -42,6 +42,6 @@ class PingpongPlot():
         self.ax.plot_surface(self.X2,self.Y2,self.Z2,alpha=0.3)
         for p in points:
             self.ax.scatter(p[0,0],p[1,0],p[2,0])
-        self.ax.scatter(self.camera_pos[0], self.camera_pos[1], self.camera_pos[2])
+        # self.ax.scatter(self.camera_pos[0], self.camera_pos[1], self.camera_pos[2])
 
         plt.pause(.0001)

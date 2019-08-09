@@ -30,7 +30,7 @@ class Settings():
     
     def __init__(self, image_shape):
         pixels = image_shape[0]*image_shape[1]
-        self.update('MIN_CONTOUR_AREA', pixels/(11**4))
+        self.update('MIN_CONTOUR_AREA', pixels/(11.5**4))
         self.update('MAX_CONTOUR_AREA', pixels/(8.2**4))
 
     @classmethod

@@ -143,8 +143,6 @@ if __name__ == '__main__':
         if cv2.waitKey(100) & 0xFF == ord('q'):
             break
 
-        print(len(obj))
-
     cap.release()
     # out.release()
     cv2.destroyAllWindows()
