@@ -6,12 +6,14 @@ from settings import Settings
 
 
 class PingpongPlot():
-    def __init__(self):
+    def __init__(self, cameras):
         self.fig = plt.figure()
         self.ax = Axes3D(self.fig)
         plot_points = []
+        self.camera_pos = []
         for i in range(3):
-            plot_points.append([Settings.get('TABLE_POINTS')[0,i], Settings.get('TABLE_POINTS')[1,i], Settings.get('TABLE_POINTS')[2,i], Settings.get('TABLE_POINTS')[3,i]])#, cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]]
+            plot_points.append([Settings.get('TABLE_POINTS')[0,i], Settings.get('TABLE_POINTS')[1,i], Settings.get('TABLE_POINTS')[2,i], Settings.get('TABLE_POINTS')[3,i]])
+            self.camera_pos.append([cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]])
         self.max_range = np.array([max(plot_points[0])-min(plot_points[0]), max(plot_points[1])-min(plot_points[1]), max(plot_points[2])-min(plot_points[2])]).max() * 1.5
 
         TABLE_WIDTH = 152.5 # cm
@@ -40,5 +42,6 @@ class PingpongPlot():
         self.ax.plot_surface(self.X2,self.Y2,self.Z2,alpha=0.3)
         for p in points:
             self.ax.scatter(p[0,0],p[1,0],p[2,0])
+        self.ax.scatter(self.camera_pos[0], self.camera_pos[1], self.camera_pos[2])
 
         plt.pause(.0001)

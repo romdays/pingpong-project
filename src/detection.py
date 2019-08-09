@@ -50,7 +50,7 @@ def detect_circular_obj_points_from_binary_image(image, min_circularity, min_con
             and min_circularity<circularity and circularity<1.0):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
 
-            points.append((x,y))
+            points.append(np.array((x,y), dtype=float))
 
             info.append((cnt, area, circularity, x, y))
 
