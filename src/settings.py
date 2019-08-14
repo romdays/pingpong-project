@@ -1,9 +1,9 @@
 import numpy as np
 
 class Settings():
-    TABLE_WIDTH = 152.5 # cm
-    TABLE_LENGTH = 274.0 # cm
-    TABLE_HEIGHT = 76.0
+    TABLE_WIDTH = 1.525 # m
+    TABLE_LENGTH = 2.740 # m
+    TABLE_HEIGHT = 0.760
     
     __settings = {
         'CALIB_PARAM': np.load('./data/npz/calib.npz'),
@@ -25,7 +25,7 @@ class Settings():
         'MIN_CONTOUR_AREA': None,
         'MAX_CONTOUR_AREA': None,
 
-        'MAX_DISTANCE': 10, # cm
+        'MAX_DISTANCE': 0.10, # m
 
         }
     

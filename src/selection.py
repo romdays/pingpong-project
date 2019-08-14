@@ -4,6 +4,68 @@ import itertools
 
 from settings import Settings
 
+# def calc_near_point(point, point_list, distance):
+#     if len(point_list)==0: return []
+#     near_points = filter(lambda x:x<distance, [np.sqrt(np.sum((point-p)**2)) for p in point_list]) # max move distance[cm] par frame
+
+#     return near_points
+
+# def calc_uniformly_accelerated_model(points, ts):
+#     dt1 = (ts[1]-ts[0])/60.
+#     dt2 = (ts[2]-ts[1])/60.
+#     acceleration = 2*(dt1*(points[2]-points[1])-dt2*(points[1]-points[0]))/(dt1*dt2*(dt1+dt2))
+#     velocity = (points[1]-points[0])/dt1 - dt1*acceleration/2.
+
+#     return acceleration, velocity
+
+
+# def select_points_fit_model(a, v, point, init, points_seq):
+#     fit_points = []
+#     counter = []
+#     for i in range(len(points_seq)):
+#         dt = (i-init)/60
+#         on_model = point + v*dt + a*(dt**2.)/2.
+#         tmp = calc_near_point(on_model, points_seq[i], 30)
+#         fit_points.append(tmp)
+#         if tmp: counter.append(i)
+
+#     if len(counter)<3: None # ２点しか見つからないとき、GGする
+
+#     ts = [counter[0], counter[len(counter)/2], counter[-1]]
+
+#     return [fit_points[i][0] for i in ts], ts
+
+
+
+# def escape(points_seq):
+#     mid = len(points_seq)/2
+#     curr = points_seq[mid]
+#     if curr and mid<3 : return []
+
+#     for point in curr:
+#         past = calc_near_point(point, points_seq[mid-1], 30)
+#         future = calc_near_point(point, points_seq[mid+1], 30)
+        
+#         for prv in past:
+#             for nxt in future:
+#                 acceleration, velocity = calc_uniformly_accelerated_model(
+#                     [prv, point,nxt], [mid-1, mid, mid+1]
+#                     )
+
+                # select_points_fit_model(
+                #     acceleration, velocity, point, mid, points_seq
+                #     )
+
+
+def calc_closest_point_nearby_prev_points(base_points, points):
+    if len(points)==0: return []
+    for i in range(len(base_points)):
+        base_point = base_points.pop()
+        if base_point: break
+    if base_point: base_point = np.array(([0],[0],[0]))
+    distance = [np.sqrt(np.sum((point-base_point)**2)) for point in points]
+    return [points[distance.index(min(distance))]]
+
 def similar_vecs(v1, v2, similarlity=0.95):
     v1_norm = np.linalg.norm(v1)
     v2_norm = np.linalg.norm(v2)

@@ -1,11 +1,15 @@
 import numpy as np
 import cv2
 import re
+import csv
 
 from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
 from corner import mark_points_of_corners
+from selection import selection
+from selection import calc_closest_point_nearby_prev_points
+from plot import PingpongPlot
 
 from settings import Settings
 
@@ -30,15 +34,11 @@ def calc_corresponding_points(point_list_A, point_list_B, camera_A, camera_B):
 
     return pairs
 
-def calc_closest_point_in_pairs(pairs):
-    if len(pairs)==0: return []
-    distance = [pair[0]**2 + pair[1]**2 for pair in pairs]
-    return pairs[distance.index(min(distance))]
 
 def triangulate(point_A, point_B, camera_A, camera_B):
     world_point_projected = cv2.triangulatePoints(camera_A.projection_matrix, camera_B.projection_matrix, point_A, point_B)
     world_point_projected = world_point_projected[:3] / world_point_projected[3]
-    
+
     return np.array(world_point_projected)
 
 def main():
@@ -47,7 +47,7 @@ def main():
     cameras = []
     images  = [[],[]]
     detected = [[],[]]
-    points  = []
+    points  = [[]]
     points_seq = []
 
     check_frame_length = 7
@@ -90,7 +90,6 @@ def main():
         # get camera params
         cameras.append(Camera(points_of_corners[i]))
 
-    from plot import PingpongPlot
     outputter = PingpongPlot(cameras)
 
     while(cap.isOpened()):
@@ -103,7 +102,6 @@ def main():
             detected[i].append(detection(images[i][0::FRAME_INTERVAL]))
             images[i].pop(0)
         
-        from selection import selection
         for i in range(2):
             holder[i] = selection(detected[i][-check_frame_length:], holder[i])
             holder[i].append([])
@@ -114,17 +112,17 @@ def main():
 
         # calc true pair point --------------------------------------------------------------------------------
 
+        # get 3d point 
         balls = []
         for pair in pairs:
             balls.append(triangulate(pair[0], pair[1], cameras[0], cameras[1]))
 
-        # get 3d point 
         points_seq.append(balls)
 
 
         holder[2] = selection(points_seq[-check_frame_length:], holder[2])
         holder[2].append([])
-        points.append(holder[2].pop(0))
+        points.append(calc_closest_point_nearby_prev_points(points[-5:], holder[2].pop(0)))
         outputter.plot(points[-1])
         # outputter.plot(balls)
 
