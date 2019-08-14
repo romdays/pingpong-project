@@ -57,7 +57,7 @@ def detect_circular_obj_points_from_binary_image(image, min_circularity, min_con
     return points, info
 
 
-def detection(images):
+def detection(images, name=""):
     mask = mask_move_obj(images[0], images[1], images[2])
     masked_img = cv2.bitwise_and(images[1], images[1], mask=mask)
     # mask = mask_hsv_color_space(masked_img, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
@@ -81,9 +81,9 @@ def detection(images):
         text='area: {}, circularity: {}, (x,y): {}'.format(data[1], data[2], (data[3],data[4]))
         cv2.putText(mask, text, (10, 50*(i+1)), cv2.FONT_HERSHEY_PLAIN, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
 
-    cv2.imshow('detection2', mask)
-    cv2.imshow('detection', images[1])
-    cv2.imshow('detection3', masked_img)
+    # cv2.imshow(name+'detection2', mask)
+    cv2.imshow(name+'detection', images[1])
+    # cv2.imshow(name+'detection3', masked_img)
 
     return points#, np.concatenate((images[1], mask), axis=0).astype(np.uint8)
 

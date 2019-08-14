@@ -54,7 +54,7 @@ def main():
     holder = [[[] for i in range(check_frame_length)] for i in range(3)]
 
     # load 2 videos ------------------------------------------
-    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    cap = cv2.VideoCapture('./data/videos/ds/11.mov')
     FRAME_INTERVAL = 4#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
     
     for i in range(int(60*5.5)):
@@ -99,7 +99,7 @@ def main():
         
         for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
             images[i].append(image)
-            detected[i].append(detection(images[i][0::FRAME_INTERVAL]))
+            detected[i].append(detection(images[i][0::FRAME_INTERVAL], name=str(i)))
             images[i].pop(0)
         
         for i in range(2):
