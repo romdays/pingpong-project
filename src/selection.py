@@ -59,10 +59,9 @@ from settings import Settings
 
 def calc_closest_point_nearby_prev_points(base_points, points):
     if len(points)==0: return []
-    for i in range(len(base_points)):
-        base_point = base_points.pop()
-        if base_point: break
-    if base_point: base_point = np.array(([0],[0],[0]))
+    base_points = [x for x in base_points if x]
+    if base_points: base_point = base_points[-1]
+    else: base_point = np.array(([0],[0],[0]))
     distance = [np.sqrt(np.sum((point-base_point)**2)) for point in points]
     return [points[distance.index(min(distance))]]
 

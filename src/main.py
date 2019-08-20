@@ -51,6 +51,8 @@ def main():
     points_seq = []
 
     check_frame_length = 7
+    prev_points_holder_2d = [[[] for i in range(check_frame_length)] for i in range(2)]
+    prev_points_holder_3d = [[] for i in range(check_frame_length)]
     holder = [[[] for i in range(check_frame_length)] for i in range(3)]
 
     # load 2 videos ------------------------------------------
@@ -103,11 +105,11 @@ def main():
             images[i].pop(0)
         
         for i in range(2):
-            holder[i] = selection(detected[i][-check_frame_length:], holder[i])
-            holder[i].append([])
+            prev_points_holder_2d[i] = selection(detected[i][-check_frame_length:], prev_points_holder_2d[i])
+            prev_points_holder_2d[i].append([])
 
         # calc correspond objs
-        pairs = calc_corresponding_points(holder[0].pop(0), holder[1].pop(0), cameras[0], cameras[1])
+        pairs = calc_corresponding_points(prev_points_holder_2d[0].pop(0), prev_points_holder_2d[1].pop(0), cameras[0], cameras[1])
         # pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
@@ -120,9 +122,9 @@ def main():
         points_seq.append(balls)
 
 
-        holder[2] = selection(points_seq[-check_frame_length:], holder[2])
-        holder[2].append([])
-        points.append(calc_closest_point_nearby_prev_points(points[-5:], holder[2].pop(0)))
+        prev_points_holder_3d = selection(points_seq[-check_frame_length:], prev_points_holder_3d)
+        prev_points_holder_3d.append([])
+        points.append(calc_closest_point_nearby_prev_points(points[-5:], prev_points_holder_3d.pop(0)))
         outputter.plot(points[-1])
         # outputter.plot(balls)
 
