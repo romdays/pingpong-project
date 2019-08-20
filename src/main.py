@@ -123,8 +123,9 @@ def main():
         points_seq.append(balls)
 
 
-        points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d)
-        points.append(calc_closest_point_nearby_prev_points(points[-5:], points_holder_3d))
+        # points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d)
+        # points.append(calc_closest_point_nearby_prev_points(points[-5:], points_holder_3d))
+        points.append(calc_closest_point_nearby_prev_points(points[-5:], balls))
         outputter.plot(points[-1])
         # outputter.plot(balls)
 
