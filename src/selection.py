@@ -88,18 +88,15 @@ def extract_points_similarly_movements(points_seq, holder):
     length = len(holder)
     holder.append([])
     if len(points_seq)<length: return holder.pop(0), holder
-    foo = []
-    for i,j,k in itertools.combinations(range(length), 3):
-        for before, middle, after in itertools.product(points_seq[i], points_seq[j], points_seq[k]):
-            v1 = (middle-before)/(j-i)
-            v2 = (after-middle)/(k-j)
-            if similar_vecs(v1, v2):
-                for bar in foo:
-                    if sum(n in (i,j,k) for n in bar[1]) == 2 and similar_vecs(v1, bar[2][0]) and similar_vecs(v2, bar[2][1]):
-                        for val, num in zip((before, middle, after)+bar[0], (i,j,k)+bar[1]):
-                            if not any([np.all(val==p) for p in holder[num]]): holder[num].append(val)
 
-                foo.append(((before, middle, after), (i,j,k), (v1, v2)))
+    for i,j,k,l in itertools.combinations(range(length), 4):
+        for p1, p2, p3, p4 in itertools.product(points_seq[i], points_seq[j], points_seq[k], points_seq[l]):
+            v1 = (p2-p1)/(j-i)
+            v2 = (p3-p2)/(k-j)
+            v3 = (p4-p3)/(l-k)
+            if similar_vecs(v1, v2) and similar_vecs(v2, v3):
+                for p, idx in zip((p1,p2,p3,p4), (i,j,k,l)):
+                    if not any([np.array_equal(val,p) for val in holder[idx]]): holder[idx].append(p)
 
     return holder.pop(0), holder
 
