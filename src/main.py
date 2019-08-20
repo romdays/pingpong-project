@@ -7,7 +7,7 @@ from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
 from corner import mark_points_of_corners
-from selection import selection
+from selection import extract_similarly_moving_points
 from selection import calc_closest_point_nearby_prev_points
 from plot import PingpongPlot
 
@@ -53,7 +53,7 @@ def main():
     check_frame_length = 7
     prev_points_holder_2d = [[[] for i in range(check_frame_length)] for i in range(2)]
     prev_points_holder_3d = [[] for i in range(check_frame_length)]
-    holder = [[[] for i in range(check_frame_length)] for i in range(3)]
+    candidate_points_holder_2d = [[],[]]
 
     # load 2 videos ------------------------------------------
     cap = cv2.VideoCapture('./data/videos/ds/11.mov')
@@ -105,11 +105,10 @@ def main():
             images[i].pop(0)
         
         for i in range(2):
-            prev_points_holder_2d[i] = selection(detected[i][-check_frame_length:], prev_points_holder_2d[i])
-            prev_points_holder_2d[i].append([])
+            candidate_points_holder_2d[i], prev_points_holder_2d[i] = extract_similarly_moving_points(detected[i][-check_frame_length:], prev_points_holder_2d[i])
 
         # calc correspond objs
-        pairs = calc_corresponding_points(prev_points_holder_2d[0].pop(0), prev_points_holder_2d[1].pop(0), cameras[0], cameras[1])
+        pairs = calc_corresponding_points(candidate_points_holder_2d[0], candidate_points_holder_2d[1], cameras[0], cameras[1])
         # pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
@@ -122,9 +121,8 @@ def main():
         points_seq.append(balls)
 
 
-        prev_points_holder_3d = selection(points_seq[-check_frame_length:], prev_points_holder_3d)
-        prev_points_holder_3d.append([])
-        points.append(calc_closest_point_nearby_prev_points(points[-5:], prev_points_holder_3d.pop(0)))
+        candidate_points_holder_3d, prev_points_holder_3d = extract_similarly_moving_points(points_seq[-check_frame_length:], prev_points_holder_3d)
+        points.append(calc_closest_point_nearby_prev_points(points[-5:], candidate_points_holder_3d))
         outputter.plot(points[-1])
         # outputter.plot(balls)
 
