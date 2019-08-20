@@ -78,8 +78,8 @@ def similar_vecs(v1, v2, similarlity=0.95):
 
 def extract_similarly_moving_points(points_seq, holder):
     length = len(holder)
-    holder = holder[:]
-    if len(points_seq)<length: return holder.pop(0), holder.append([])
+    holder.append([])
+    if len(points_seq)<length: return holder.pop(0), holder
     foo = []
     for i,j,k in itertools.combinations(range(length), 3):
         for before, middle, after in itertools.product(points_seq[i], points_seq[j], points_seq[k]):
@@ -93,7 +93,7 @@ def extract_similarly_moving_points(points_seq, holder):
 
                 foo.append(((before, middle, after), (i,j,k), (v1, v2)))
 
-    return holder.pop(0), holder.append([])
+    return holder.pop(0), holder
 
 if __name__ == '__main__':
     for i,j,k in itertools.combinations(range(5), 3):
