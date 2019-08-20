@@ -10,6 +10,10 @@ class Settings():
 
         'FRAME_INTERVAL': 1,
 
+        'TABLE_WIDTH': TABLE_WIDTH,
+        'TABLE_LENGTH': TABLE_LENGTH,
+        'TABLE_HEIGHT': TABLE_HEIGHT,
+
         'TABLE_POINTS': np.array([
             (-TABLE_LENGTH/2,  TABLE_WIDTH/2, TABLE_HEIGHT),
             (-TABLE_LENGTH/2, -TABLE_WIDTH/2, TABLE_HEIGHT),

@@ -16,9 +16,9 @@ class PingpongPlot():
             self.camera_pos.append([cameras[0].camera_position[i,0], cameras[1].camera_position[i,0]])
         self.max_range = np.array([max(plot_points[0])-min(plot_points[0]), max(plot_points[1])-min(plot_points[1]), max(plot_points[2])-min(plot_points[2])]).max() * 1.5
 
-        TABLE_WIDTH = 1.525 # cm
-        TABLE_LENGTH = 2.740 # cm
-        TABLE_HEIGHT = 0.760
+        TABLE_WIDTH = Settings.get('TABLE_WIDTH')
+        TABLE_LENGTH = Settings.get('TABLE_LENGTH')
+        TABLE_HEIGHT = Settings.get('TABLE_HEIGHT')
         # table
         x = np.linspace(-TABLE_LENGTH/2,TABLE_LENGTH/2,11)
         y = np.linspace(-TABLE_WIDTH/2,TABLE_WIDTH/2,11)

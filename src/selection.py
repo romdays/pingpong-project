@@ -57,10 +57,8 @@ from settings import Settings
                 #     )
 def narrow_down_by_existence_area(points):
     def is_in_play_area(point):
-        TABLE_WIDTH = 1.525 # m
-        TABLE_LENGTH = 2.740 # m
-        grad_x= 2.0 * TABLE_WIDTH / TABLE_LENGTH * point[0,0]
-        intercept = TABLE_WIDTH / 2.0
+        grad_x= 2.0 * Settings.get('TABLE_WIDTH') / Settings.get('TABLE_LENGTH') * point[0,0]
+        intercept = Settings.get('TABLE_WIDTH') / 2.0
         return not(point[1,0] - grad_x - intercept > 0 and point[1,0] + grad_x - intercept > 0
                 or point[1,0] - grad_x + intercept < 0 and point[1,0] + grad_x + intercept < 0)
 
