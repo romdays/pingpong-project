@@ -7,7 +7,7 @@ from camera import Camera
 from detection import detection
 from detection import vsplit_ds_frame
 from corner import mark_points_of_corners
-from selection import extract_similarly_moving_points
+from selection import extract_points_similarly_movements
 from selection import calc_closest_point_nearby_prev_points
 from plot import PingpongPlot
 
@@ -105,7 +105,7 @@ def main():
             images[i].pop(0)
         
         for i in range(2):
-            candidate_points_holder_2d[i], prev_points_holder_2d[i] = extract_similarly_moving_points(detected[i][-check_frame_length:], prev_points_holder_2d[i])
+            candidate_points_holder_2d[i], prev_points_holder_2d[i] = extract_points_similarly_movements(detected[i][-check_frame_length:], prev_points_holder_2d[i])
 
         # calc correspond objs
         pairs = calc_corresponding_points(candidate_points_holder_2d[0], candidate_points_holder_2d[1], cameras[0], cameras[1])
@@ -121,7 +121,7 @@ def main():
         points_seq.append(balls)
 
 
-        candidate_points_holder_3d, prev_points_holder_3d = extract_similarly_moving_points(points_seq[-check_frame_length:], prev_points_holder_3d)
+        candidate_points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d)
         points.append(calc_closest_point_nearby_prev_points(points[-5:], candidate_points_holder_3d))
         outputter.plot(points[-1])
         # outputter.plot(balls)

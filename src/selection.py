@@ -76,7 +76,7 @@ def similar_vecs(v1, v2, similarlity=0.95):
         return True
     else: return False
 
-def extract_similarly_moving_points(points_seq, holder):
+def extract_points_similarly_movements(points_seq, holder):
     length = len(holder)
     holder.append([])
     if len(points_seq)<length: return holder.pop(0), holder
