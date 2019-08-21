@@ -10,7 +10,7 @@ from corner import mark_points_of_corners
 from selection import extract_points_similarly_movements
 from selection import narrow_down_by_existence_area
 from selection import calc_closest_point_nearby_prev_points
-from plot import PingpongPlot
+from plot import *
 
 from settings import Settings
 
@@ -57,10 +57,10 @@ def main():
     points_holder_2d = [[],[]]
 
     # load 2 videos ------------------------------------------
-    cap = cv2.VideoCapture('./data/videos/ds/11.mov')
+    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
     FRAME_INTERVAL = 4#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
     
-    for i in range(int(60*9.5)):
+    for i in range(int(60*5.5)):
         ret, frame = cap.read()
 
     # detect feature point from 2 views
@@ -134,5 +134,9 @@ def main():
     cap.release()
 
 
+
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    datastadium_plot()
