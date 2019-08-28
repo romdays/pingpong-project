@@ -1,6 +1,7 @@
 
 import numpy as np
 import csv
+import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from settings import Settings
@@ -47,22 +48,45 @@ class PingpongPlot():
 
         plt.pause(.0001)
 
+    def open_writer(self):
+        self.file = open('./data/csv/sample_writer_row.csv', 'w')
+        self.writer = csv.writer(self.file)
+        self.fps = 1./60.
+        self.time = 0
+        self.prev = np.array([[0],[0],[0]])
 
-def datastadium_plot():
-    with open('data/csv/20190318_1.csv') as f:
+    def close_writer(self):
+        self.file.close
+
+    def write(self, points):
+        if points:
+            self.writer.writerow([self.time, 0, points[0][0,0],points[0][1,0],points[0][2,0]])
+            self.prev = points[0]
+        else:
+            self.writer.writerow([self.time, 0])
+        self.time = self.time + self.fps
+
+
+def datastadium_plot(num=3):
+    with open('data/csv/20190318_'+str(num)+'.csv') as f:
         reader = csv.reader(f)
         outputter = PingpongPlot()
+        prev = np.array([[0],[0],[0]])
         for row in reader:
             if len(row)==11:
                 point = np.array([[float(row[2])], [float(row[3])], [float(row[4])+Settings.get('TABLE_HEIGHT')]])
-                outputter.plot([point])
+                if np.array_equal(point,prev): outputter.plot([])
+                else: outputter.plot([point])
+                prev = point
 
-
-def mydata_plot():
-    with open('data/csv/sample_writer_row.csv') as f:
+def mydata_plot(num=3):
+    with open('data/csv/sample_writer_row_'+str(num)+'.csv') as f:
         reader = csv.reader(f)
         outputter = PingpongPlot()
+        prev = np.array([[0],[0],[0]])
         for row in reader:
-            if len(row)==4:
-                point = np.array([[float(row[1])], [float(row[2])], [float(row[3])]])
-                outputter.plot([point])
+            if len(row)==5:
+                point = np.array([[float(row[2])], [float(row[3])], [float(row[4])]])
+                if np.array_equal(point,prev): outputter.plot([])
+                else: outputter.plot([point])
+                prev = point

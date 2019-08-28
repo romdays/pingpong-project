@@ -94,6 +94,7 @@ def main():
         cameras.append(Camera(points_of_corners[i]))
 
     outputter = PingpongPlot(cameras)
+    outputter.open_writer()
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -102,8 +103,8 @@ def main():
         
         for i, image in enumerate(vsplit_ds_frame(frame, image_shape)):
             images[i].append(image)
-            detected[i].append(detection(images[i][0::FRAME_INTERVAL], name=str(i)))
-            images[i].pop(0)
+            detected[i].append(detection(images[i][::-FRAME_INTERVAL][::-1], name=str(i)))
+            if len(images[i])>check_frame_length: images[i].pop(0)
         
         for i in range(2):
             points_holder_2d[i], prev_points_holder_2d[i] = extract_points_similarly_movements(detected[i][-check_frame_length:], prev_points_holder_2d[i])
@@ -129,7 +130,9 @@ def main():
         outputter.plot(points[-1])
         # outputter.plot(balls)
 
+        outputter.write(points[-1])
 
+    outputter.close_writer()
     # np.savez('./data/npz/points', points = points, points_seq = points_seq)
     cap.release()
 
@@ -138,5 +141,6 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    datastadium_plot()
+    main()
+    # datastadium_plot(3)
+    mydata_plot(3)
