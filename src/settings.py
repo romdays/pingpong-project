@@ -29,8 +29,10 @@ class Settings():
         'MIN_CONTOUR_AREA': None,
         'MAX_CONTOUR_AREA': None,
 
-        'MAX_DISTANCE': 0.10, # m
+        'MAX_DISTANCE': 0.10, # m,
 
+        'TEMPLATE_MIN_CIRCULARITY': 0.95,
+        'TEMPLATE_MIN_SIMILARITY': 0.85,
         }
     
     def __init__(self, image_shape):
@@ -40,9 +42,29 @@ class Settings():
 
     @classmethod
     def get(cls, key):
-        return cls.__settings[key]
+        return cls.__settings.get(key)
 
     @classmethod
     def update(cls, key, value):
         cls.__settings[key] = value
+
+
+    @classmethod
+    def get_template(cls, key):
+        if cls.__settings.get('TEMPLATE_'+key) is None and cls.__settings.get('FIRST_TEMPLATE_IMAGE'):
+            return cls.__settings.get('FIRST_TEMPLATE_IMAGE')
+        return cls.__settings.get('TEMPLATE_'+key)
+
+    @classmethod
+    def update_template(cls, key, value):
+        if cls.__settings.get('TEMPLATE_'+key) is None:
+            cls.__settings['TEMPLATE_'+key] = []
+            cls.__settings['FIRST_TEMPLATE_IMAGE'] = [value]
+        cls.__settings['TEMPLATE_'+key].append(value)
+
+    @classmethod
+    def remove_template(cls, key, index):
+        if cls.__settings.get('TEMPLATE_'+key) is None: return
+        elif len(cls.__settings.get('TEMPLATE_'+key)) > index:
+            cls.__settings.get('TEMPLATE_'+key).pop(index)
 

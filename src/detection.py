@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
+import itertools
 
 from settings import Settings
+from selection import similar_vecs
 
 def mask_move_obj(prev_img, curr_img, next_img):
     prev_img = cv2.blur(cv2.cvtColor(prev_img, cv2.COLOR_BGR2GRAY), ksize=(5,5))
@@ -48,7 +50,7 @@ def detect_circular_obj_points_from_binary_image(image, min_circularity, min_con
         circularity = 4*np.pi*area/(arclen**2)
         if (min_contour_area<area and area<max_contour_ara \
             and min_circularity<circularity and circularity<1.0):
-            x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
+            x,y= int(mu["m10"]/mu["m00"])+1, int(mu["m01"]/mu["m00"])+1
 
             points.append(np.array((x,y), dtype=float))
 
@@ -56,8 +58,67 @@ def detect_circular_obj_points_from_binary_image(image, min_circularity, min_con
 
     return points, info
 
+def search_template_area(images, name=''):
+    mask = mask_move_obj(images[0], images[1], images[2])
+    masked_img = cv2.bitwise_and(images[1], images[1], mask=mask)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        cnt = cv2.convexHull(cnt)
+        arclen = cv2.arcLength(cnt, True)
+        if arclen < 1e-8: continue
+        mu = cv2.moments(cnt)
+        area = mu["m00"] # cv2.contourArea(cnt)
+        circularity = 4*np.pi*area/(arclen**2)
+        if (Settings.get('MIN_CONTOUR_AREA')<area and Settings.get('MAX_CONTOUR_AREA') \
+            and Settings.get('TEMPLATE_MIN_CIRCULARITY')<circularity and circularity<1.0):
+            x,y= int(mu["m10"]/mu["m00"])+1, int(mu["m01"]/mu["m00"])+1
+            side = int(np.sqrt(area/np.pi)//1 + 1)
+            Settings.update_template(name, masked_img[y-side:y+side,x-side:x+side])
+    return Settings.get_template(name), masked_img
+
+def template_matching_detection(images, name=''):
+    points = []
+    score = [0]
+    
+    temp_imgs, masked_img = search_template_area(images, name)
+    if temp_imgs:
+        max_values = []
+        gray = cv2.cvtColor(masked_img, cv2.COLOR_RGB2GRAY)
+        for temp in temp_imgs:
+            temp = cv2.cvtColor(temp, cv2.COLOR_RGB2GRAY)
+            side,_ = temp.shape
+
+            match = cv2.matchTemplate(gray, temp, cv2.TM_CCOEFF_NORMED)
+
+            min_value, max_value, min_pt, max_pt = cv2.minMaxLoc(match)
+            points.append(np.array((max_pt[0]+side//2,max_pt[1]+side//2), dtype=float))
+            max_values.append(max_value)
+            # cv2.circle(images[1],(max_pt[0]+side//2,max_pt[1]+side//2), 5, (0,0,255), -1)
+
+        similarity = Settings.get('TEMPLATE_MIN_SIMILARITY')
+        for i,j in itertools.combinations(range(len(points)), 2):
+            if len(score) <= j: score.append(0)
+            if similar_vecs(points[i], points[j]):
+                if max_values[i] > similarity: score[i] += 1
+                if max_values[j] > similarity: score[j] += 1
+
+    best = score[::-1].index(max(score))
+    best = points[::-1][best:best+1]
+    
+    while temp_imgs and len(temp_imgs) > 5:
+        worst = score.index(min(score))
+        Settings.remove_template(name, worst)
+        temp_imgs = Settings.get_template(name)
+        score.pop(worst)
+
+    if best: cv2.circle(images[1],(int(best[0][0]),int(best[0][1])), 5, (0,0,255), -1)
+    cv2.imshow('detection:'+name, images[1])
+
+    return best
 
 def detection(images, name=""):
+    return template_matching_detection(images, name)
+    
     mask = mask_move_obj(images[0], images[1], images[2])
     masked_img = cv2.bitwise_and(images[1], images[1], mask=mask)
     # mask = mask_hsv_color_space(masked_img, Settings.get('LOWER_COLOR'), Settings.get('UPPER_COLOR'))
@@ -82,7 +143,7 @@ def detection(images, name=""):
         cv2.putText(mask, text, (10, 50*(i+1)), cv2.FONT_HERSHEY_PLAIN, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
 
     # cv2.imshow(name+'detection2', mask)
-    cv2.imshow(name+'detection', images[1])
+    # cv2.imshow(name+'detection', images[1])
     # cv2.imshow(name+'detection3', masked_img)
 
     return points#, np.concatenate((images[1], mask), axis=0).astype(np.uint8)
@@ -127,7 +188,6 @@ if __name__ == '__main__':
 
     # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     # out = cv2.VideoWriter('./data/output/output.mp4',fourcc, 60.0, (frame.shape[1], frame.shape[0]*2))
-
     while(cap.isOpened()):
         ret, frame = cap.read()
         frame, _ = vsplit_ds_frame(frame, image_shape)
@@ -135,7 +195,9 @@ if __name__ == '__main__':
             break
 
         images.append(frame)
-        obj = detection(images[0::Settings.get('FRAME_INTERVAL')])
+        # obj = detection(images[0::Settings.get('FRAME_INTERVAL')])
+        # temp_match(images)
+        get_template(images)
         images.pop(0)
 
         # out.write(img)

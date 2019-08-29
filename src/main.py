@@ -5,6 +5,7 @@ import csv
 
 from camera import Camera
 from detection import detection
+from detection import template_matching_detection
 from detection import vsplit_ds_frame
 from corner import mark_points_of_corners
 from selection import extract_points_similarly_movements
@@ -127,10 +128,9 @@ def main():
         # points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d)
         # points.append(calc_closest_point_nearby_prev_points(points[-5:], points_holder_3d))
         points.append(calc_closest_point_nearby_prev_points(points[-5:], balls))
-        outputter.plot(points[-1])
-        # outputter.plot(balls)
-
-        outputter.write(points[-1])
+        # outputter.plot(points[-1])
+        outputter.plot(balls)
+        outputter.write(balls)
 
     outputter.close_writer()
     # np.savez('./data/npz/points', points = points, points_seq = points_seq)
@@ -143,4 +143,4 @@ def main():
 if __name__ == '__main__':
     main()
     # datastadium_plot(3)
-    mydata_plot(3)
+    # mydata_plot(3)

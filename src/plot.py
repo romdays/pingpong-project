@@ -80,6 +80,7 @@ def datastadium_plot(num=3):
                 prev = point
 
 def mydata_plot(num=3):
+    # with open('data/csv/tempmatch_writer_row_'+str(num)+'.csv') as f:
     with open('data/csv/sample_writer_row_'+str(num)+'.csv') as f:
         reader = csv.reader(f)
         outputter = PingpongPlot()
@@ -87,6 +88,6 @@ def mydata_plot(num=3):
         for row in reader:
             if len(row)==5:
                 point = np.array([[float(row[2])], [float(row[3])], [float(row[4])]])
-                if np.array_equal(point,prev): outputter.plot([])
+                if np.array_equal(point,prev): continue # outputter.plot([])
                 else: outputter.plot([point])
                 prev = point
