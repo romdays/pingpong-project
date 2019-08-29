@@ -50,7 +50,7 @@ def detect_circular_obj_points_from_binary_image(image, min_circularity, min_con
         circularity = 4*np.pi*area/(arclen**2)
         if (min_contour_area<area and area<max_contour_ara \
             and min_circularity<circularity and circularity<1.0):
-            x,y= int(mu["m10"]/mu["m00"])+1, int(mu["m01"]/mu["m00"])+1
+            x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
 
             points.append(np.array((x,y), dtype=float))
 
@@ -69,9 +69,8 @@ def search_template_area(images, name=''):
         mu = cv2.moments(cnt)
         area = mu["m00"] # cv2.contourArea(cnt)
         circularity = 4*np.pi*area/(arclen**2)
-        if (Settings.get('MIN_CONTOUR_AREA')<area and Settings.get('MAX_CONTOUR_AREA') \
-            and Settings.get('TEMPLATE_MIN_CIRCULARITY')<circularity and circularity<1.0):
-            x,y= int(mu["m10"]/mu["m00"])+1, int(mu["m01"]/mu["m00"])+1
+        if (Settings.get('TEMPLATE_MIN_CIRCULARITY')<circularity and circularity<1.0):
+            x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
             side = int(np.sqrt(area/np.pi)//1 + 1)
             Settings.update_template(name, masked_img[y-side:y+side,x-side:x+side])
     return Settings.get_template(name), masked_img
@@ -197,7 +196,7 @@ if __name__ == '__main__':
         images.append(frame)
         # obj = detection(images[0::Settings.get('FRAME_INTERVAL')])
         # temp_match(images)
-        get_template(images)
+        template_matching_detection(images)
         images.pop(0)
 
         # out.write(img)
