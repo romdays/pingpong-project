@@ -141,6 +141,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
     # datastadium_plot(3)
     # mydata_plot(3)
+    compare_me_ds_plot(3)
