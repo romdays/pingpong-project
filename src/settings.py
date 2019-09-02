@@ -9,6 +9,7 @@ class Settings():
         'CALIB_PARAM': np.load('./data/npz/calib.npz'),
 
         'FRAME_INTERVAL': 1,
+        'DELAY_FOR_SELECTION': 9,
 
         'TABLE_WIDTH': TABLE_WIDTH,
         'TABLE_LENGTH': TABLE_LENGTH,
@@ -24,6 +25,9 @@ class Settings():
         'GAMMA': 1.3,
         'LOWER_COLOR': np.array([0,0,50]),
         'UPPER_COLOR': np.array([10,50,255]),
+
+        'COS_SIMILARITY_2D': 0.85,
+        'COS_SIMILARITY_3D': 0.75,
 
         'MIN_CIRCULARITY': 0.75,
         'MIN_CONTOUR_AREA': None,

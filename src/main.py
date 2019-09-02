@@ -52,7 +52,7 @@ def main():
     points  = [[]]
     points_seq = []
 
-    check_frame_length = 9
+    check_frame_length = Settings.get('DELAY_FOR_SELECTION')
     prev_points_holder_2d = [[[] for i in range(check_frame_length)] for i in range(2)]
     prev_points_holder_3d = [[] for i in range(check_frame_length)]
     points_holder_2d = [[],[]]
@@ -96,6 +96,8 @@ def main():
 
     outputter = PingpongPlot(cameras)
     outputter.open_writer()
+    cos_sim_2d = Settings.get('COS_SIMILARITY_2D')
+    cos_sim_3d = Settings.get('COS_SIMILARITY_3D')
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -108,11 +110,10 @@ def main():
             if len(images[i])>check_frame_length: images[i].pop(0)
         
         for i in range(2):
-            points_holder_2d[i], prev_points_holder_2d[i] = extract_points_similarly_movements(detected[i][-check_frame_length:], prev_points_holder_2d[i])
+            points_holder_2d[i], prev_points_holder_2d[i] = extract_points_similarly_movements(detected[i][-check_frame_length:], prev_points_holder_2d[i], cos_sim_2d)
 
         # calc correspond objs
         pairs = calc_corresponding_points(points_holder_2d[0], points_holder_2d[1], cameras[0], cameras[1])
-        # pairs = calc_corresponding_points(detected[0][-1], detected[1][-1], cameras[0], cameras[1])
 
         # calc true pair point --------------------------------------------------------------------------------
 
@@ -125,12 +126,10 @@ def main():
         points_seq.append(balls)
 
 
-        # points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d)
-        # points.append(calc_closest_point_nearby_prev_points(points[-5:], points_holder_3d))
-        points.append(calc_closest_point_nearby_prev_points(points[-5:], balls))
-        # outputter.plot(points[-1])
-        outputter.plot(balls)
-        outputter.write(balls)
+        points_holder_3d, prev_points_holder_3d = extract_points_similarly_movements(points_seq[-check_frame_length:], prev_points_holder_3d, cos_sim_3d)
+        points.append(calc_closest_point_nearby_prev_points(points[-5:], points_holder_3d))
+        outputter.plot(points[-1])
+        outputter.write(points[-1])
 
     outputter.close_writer()
     # np.savez('./data/npz/points', points = points, points_seq = points_seq)
@@ -141,7 +140,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     # datastadium_plot(3)
     # mydata_plot(3)
-    compare_me_ds_plot(3)
+    # compare_me_ds_plot(3)
