@@ -101,18 +101,18 @@ def template_matching_detection(images, name=''):
                 if max_values[i] > similarity: score[i] += 1
                 if max_values[j] > similarity: score[j] += 1
 
-    best = score[::-1].index(max(score))
-    best = points[::-1][best:best+1]
+    best_idx = score[::-1].index(max(score))
+    best_point = points[::-1][best_idx:best_idx+1]
     
-        worst = score.index(min(score))
-        Settings.remove_template(name, worst)
-        temp_imgs = Settings.get_template(name)
-        score.pop(worst)
+    while temp_imgs and len(Settings.get_template(name)) > 5:
+        worst_idx = score.index(min(score))
+        Settings.remove_template(name, worst_idx)
+        score.pop(worst_idx)
 
-    if best: cv2.circle(images[1],(int(best[0][0]),int(best[0][1])), 5, (0,0,255), -1)
+    if best_point: cv2.circle(images[1],(int(best_point[0][0]),int(best_point[0][1])), 5, (0,0,255), -1)
     cv2.imshow('detection:'+name, images[1])
 
-    return best
+    return best_point
 
 def detection(images, name=""):
     return template_matching_detection(images, name)
