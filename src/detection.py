@@ -104,7 +104,6 @@ def template_matching_detection(images, name=''):
     best = score[::-1].index(max(score))
     best = points[::-1][best:best+1]
     
-    while temp_imgs and len(temp_imgs) > 5:
         worst = score.index(min(score))
         Settings.remove_template(name, worst)
         temp_imgs = Settings.get_template(name)
