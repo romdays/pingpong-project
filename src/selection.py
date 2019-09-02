@@ -73,7 +73,7 @@ def calc_closest_point_nearby_prev_points(base_points, points):
     distance = [np.sqrt(np.sum((point-base_point)**2)) for point in points]
     return [points[distance.index(min(distance))]]
 
-def similar_vecs(v1, v2, similarlity=0.95):
+def similar_vecs(v1, v2, similarlity=0.85):
     v1_norm = np.linalg.norm(v1)
     v2_norm = np.linalg.norm(v2)
     if not v1_norm or not v2_norm: return False
