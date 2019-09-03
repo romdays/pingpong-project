@@ -58,10 +58,10 @@ def main():
     points_holder_2d = [[],[]]
 
     # load 2 videos ------------------------------------------
-    cap = cv2.VideoCapture('./data/videos/ds/13.mov')
+    cap = cv2.VideoCapture('./data/videos/ds/11.mov')
     FRAME_INTERVAL = 4#int(-(-cap.get(cv2.CAP_PROP_FPS)//60))
     
-    for i in range(int(60*5.5)):
+    for i in range(int(60*75.5)):
         ret, frame = cap.read()
 
     # detect feature point from 2 views
@@ -136,11 +136,5 @@ def main():
     cap.release()
 
 
-
-
-
 if __name__ == '__main__':
     main()
-    # datastadium_plot(3)
-    # mydata_plot(3)
-    # compare_me_ds_plot(3)

@@ -73,18 +73,18 @@ def calc_closest_point_nearby_prev_points(base_points, points):
     distance = [np.sqrt(np.sum((point-base_point)**2)) for point in points]
     return [points[distance.index(min(distance))]]
 
-def similar_vecs(v1, v2, similarlity=0.95):
+def similar_vecs(v1, v2, similarity=0.95):
     v1_norm = np.linalg.norm(v1)
     v2_norm = np.linalg.norm(v2)
     if not v1_norm or not v2_norm: return False
     cos = np.dot(v1.flatten(), v2.flatten()) / (v1_norm * v2_norm)
     ratio = 1.0 - (np.abs(v1_norm - v2_norm) / (v1_norm + v2_norm))
 
-    if cos * ratio  > similarlity:
+    if cos * ratio  > similarity:
         return True
     else: return False
 
-def extract_points_similarly_movements(points_seq, holder, similarlity=0.95):
+def extract_points_similarly_movements(points_seq, holder, similarity=0.95):
     length = len(holder)
     holder.append([])
     if length < 4: raise Exception('expect len(holder) >= 4. but len(holder): {}'.format(length))
@@ -96,7 +96,7 @@ def extract_points_similarly_movements(points_seq, holder, similarlity=0.95):
             v1 = (p2-p1)/(j-i)
             v2 = (p3-p2)/(k-j)
             v3 = (p4-p3)/(l-k)
-            if similar_vecs(v1, v2, similarlity) and similar_vecs(v2, v3, similarlity):
+            if similar_vecs(v1, v2, similarity) and similar_vecs(v2, v3, similarity):
                 for p, idx in zip((p1,p2,p3,p4), (i,j,k,l)):
                     if not any([np.array_equal(val,p) for val in holder[idx]]): holder[idx].append(p)
 

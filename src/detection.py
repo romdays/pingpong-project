@@ -71,13 +71,13 @@ def search_template_area(images, name=''):
         circularity = 4*np.pi*area/(arclen**2)
         if (Settings.get('TEMPLATE_MIN_CIRCULARITY')<circularity and circularity<1.0):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
-            side = int(np.sqrt(area/np.pi)//1 + 1)
-            Settings.update_template(name, masked_img[y-side:y+side,x-side:x+side])
+            radius = int(np.sqrt(area/np.pi)//1 + 1)
+            if x < radius or y < radius: continue
+            Settings.update_template(name, masked_img[y-radius:y+radius,x-radius:x+radius])
     return Settings.get_template(name), masked_img
 
 def template_matching_detection(images, name=''):
     points = []
-    score = [0]
     
     temp_imgs, masked_img = search_template_area(images, name)
     if temp_imgs:
@@ -94,25 +94,34 @@ def template_matching_detection(images, name=''):
             max_values.append(max_value)
             # cv2.circle(images[1],(max_pt[0]+side//2,max_pt[1]+side//2), 5, (0,0,255), -1)
 
+        unique = [True]
         similarity = Settings.get('TEMPLATE_MIN_SIMILARITY')
         for i,j in itertools.combinations(range(len(points)), 2):
-            if len(score) <= j: score.append(0)
-            if similar_vecs(points[i], points[j]):
-                if max_values[i] > similarity: score[i] += 1
-                if max_values[j] > similarity: score[j] += 1
+            if len(unique) <= j: unique.append(True)
+            if similar_vecs(points[i], points[j], similarity):
+                if max_values[i] < max_values[j]: unique[i] = False
+                else: unique[j] = False
 
-    best_idx = score[::-1].index(max(score))
-    best_point = points[::-1][best_idx:best_idx+1]
+        points = [points[i] for i in range(len(points)) if unique[i]]
     
-    while temp_imgs and len(Settings.get_template(name)) > 5:
-        worst_idx = score.index(min(score))
-        Settings.remove_template(name, worst_idx)
-        score.pop(worst_idx)
+        if len(temp_imgs) > 5:
+            small_values = [val for i, val in enumerate(max_values) if unique[i]]
+            small_values.sort()
+            print(small_values)
+            while len(temp_imgs) > 5 and small_values:
+                idx = max_values.index(small_values.pop(0))
+                Settings.remove_template(name, idx)
+                max_values.pop(idx)
+                temp_imgs = Settings.get_template(name)
 
-    if best_point: cv2.circle(images[1],(int(best_point[0][0]),int(best_point[0][1])), 5, (0,0,255), -1)
-    cv2.imshow('detection:'+name, images[1])
+        for i, temp in enumerate(temp_imgs):
+            cv2.imshow('temp'+name+'-'+str(i), temp)
+                
+    for p in points:
+        cv2.circle(images[1],(int(p[0]),int(p[1])), 5, (0,0,255), -1)
+    cv2.imshow('detection'+name, images[1])
 
-    return best_point
+    return points
 
 def detection(images, name=""):
     return template_matching_detection(images, name)

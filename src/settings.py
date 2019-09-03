@@ -3,7 +3,7 @@ import numpy as np
 class Settings():
     TABLE_WIDTH = 1.525 # m
     TABLE_LENGTH = 2.740 # m
-    TABLE_HEIGHT = 0.760
+    TABLE_HEIGHT = 0#.760
     
     __settings = {
         'CALIB_PARAM': np.load('./data/npz/calib.npz'),
@@ -35,8 +35,8 @@ class Settings():
 
         'MAX_DISTANCE': 0.10, # m,
 
-        'TEMPLATE_MIN_CIRCULARITY': 0.95,
-        'TEMPLATE_MIN_SIMILARITY': 0.85,
+        'TEMPLATE_MIN_CIRCULARITY': 0.90,
+        'TEMPLATE_MIN_SIMILARITY': 0.99,
         }
     
     def __init__(self, image_shape):

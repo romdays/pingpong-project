@@ -49,7 +49,7 @@ class PingpongPlot():
         plt.pause(.0001)
 
     def open_writer(self):
-        self.file = open('./data/csv/sample_writer_row.csv', 'w')
+        self.file = open('./data/csv/sample_plot.csv', 'w')
         self.writer = csv.writer(self.file)
         self.fps = 1./60.
         self.time = 0
@@ -60,7 +60,7 @@ class PingpongPlot():
 
     def write(self, points):
         if points:
-            self.writer.writerow([self.time, 0, points[0][0,0],points[0][1,0],points[0][2,0]])
+            self.writer.writerow([self.time, 0, points[0][0,0],points[0][1,0],points[0][2,0],0,0,0,0,0,0])
             self.prev = points[0]
         else:
             self.writer.writerow([self.time, 0])
@@ -74,7 +74,6 @@ def datastadium_plot(num=3):
         prev = np.array([[0],[0],[0]])
         for row in reader:
             if len(row)==11:
-                point = np.array([[float(row[2])], [float(row[3])], [float(row[4])+Settings.get('TABLE_HEIGHT')]])
                 # if np.array_equal(point,prev): print(float(row[0]))
                 # else: outputter.plot([point])
                 # prev = point
@@ -87,10 +86,6 @@ def mydata_plot(num=3):
         reader = csv.reader(f)
         outputter = PingpongPlot()
         prev = np.array([[0],[0],[0]])
-        for row in reader:
-            if len(row)==5:
-                point = np.array([[float(row[2])], [float(row[3])], [float(row[4])]])
-                # if np.array_equal(point,prev): continue # outputter.plot([])
                 # else: outputter.plot([point])
                 # prev = point
                 outputter.plot([point])
@@ -99,7 +94,7 @@ def compare_me_ds_plot(num=3):
     cap = cv2.VideoCapture('./data/videos/ds/1'+str(num)+'.mov')
     for i in range(int(60*5.5)):
         ret, frame = cap.read()
-    fps = 1./60.
+    fps = 1./30.
     time_counter = 0
     time_ds = 0
     time_me = 0
@@ -122,37 +117,49 @@ def compare_me_ds_plot(num=3):
             while data_ds:
                 row_ds = data_ds.pop(0)
                 if len(row_ds)!=11: continue
-                time_ds = float(row_ds[0])-diff-jump
-                break
+    time_1 = 0
+    time_2 = 0
+    diff = 0.1
+    jump = 0
 
-            while data_me and ret:
-                row_me = data_me.pop(0)
-                ret, frame = cap.read()
-                if len(row_me)!=5: continue
-                time_me = float(row_me[0])-jump
-                break
+    with open(csv_1) as f_1:
+        data_1 = [row for row in csv.reader(f_1)]
+    with open(csv_2) as f_2:
+        data_2 = [row for row in csv.reader(f_2)]
+    outputter = PingpongPlot()
+    point_1 = np.array([[0],[0],[0]])
+    point_2 = np.array([[0],[0],[0]])
 
-            while data_ds and data_me and ret:
-                while data_ds:
-                    if time_ds > time_counter: break
-                    if len(row_ds)==11:
-                        point_ds = np.array([[float(row_ds[2])], [float(row_ds[3])], [float(row_ds[4])+Settings.get('TABLE_HEIGHT')]])
-                    row_ds = data_ds.pop(0)
-                    if len(row_ds)!=11: continue
-                    time_ds = float(row_ds[0])-diff-jump
+    while data_1:
+        row_1 = data_1.pop(0)
+        if len(row_1)!=11: continue
+        time_1 = float(row_1[0])-diff-jump
+        break
 
-                while data_me and ret:
-                    if time_me > time_counter: break
-                    if len(row_me)==5: 
-                        point_me = np.array([[float(row_me[2])], [float(row_me[3])], [float(row_me[4])]])
-                    row_me = data_me.pop(0)
-                    ret, frame = cap.read()
-                    time_me = float(row_me[0])-jump
-                
-                # seq['image'].append(frame)
-                # seq['ds'].append(point_ds)
-                # seq['me'].append(point_me)
-                # seq['ts'].append(time_counter)
-                outputter.plot([point_ds, point_me])
-                cv2.imshow("frame", frame)
-                time_counter += fps
+    while data_2 and ret:
+        row_2 = data_2.pop(0)
+        ret, frame = cap.read()
+        if len(row_2)!=11: continue
+        time_2 = float(row_2[0])-jump
+        break
+
+    while data_1 and data_2 and ret:
+        while data_1:
+            if time_1 > time_counter: break
+            if len(row_1)==11:
+                point_1 = np.array([[float(row_1[2])], [float(row_1[3])], [float(row_1[4])]])
+            row_1 = data_1.pop(0)
+            if len(row_1)!=11: continue
+            time_1 = float(row_1[0])-diff-jump
+            
+        while data_2 and ret:
+            if time_2 > time_counter: break
+            if len(row_2)==11: 
+                point_2 = np.array([[float(row_2[2])], [float(row_2[3])], [float(row_2[4])]])
+            row_2 = data_2.pop(0)
+            ret, frame = cap.read()
+            time_2 = float(row_2[0])-jump
+        
+        outputter.plot([point_2])
+        cv2.imshow("frame", frame)
+        time_counter += fps
