@@ -63,60 +63,19 @@ class PingpongPlot():
             self.writer.writerow([self.time, 0, points[0][0,0],points[0][1,0],points[0][2,0],0,0,0,0,0,0])
             self.prev = points[0]
         else:
-            self.writer.writerow([self.time, 0])
+            self.writer.writerow([self.time, 0, self.prev[0,0],self.prev[1,0],self.prev[2,0],0,0,0,0,0,0])
         self.time = self.time + self.fps
 
 
-def datastadium_plot(num=3):
-    with open('data/csv/20190318_'+str(num)+'.csv') as f:
-        reader = csv.reader(f)
-        outputter = PingpongPlot()
-        prev = np.array([[0],[0],[0]])
-        for row in reader:
-            if len(row)==11:
-                # if np.array_equal(point,prev): print(float(row[0]))
-                # else: outputter.plot([point])
-                # prev = point
-                print(float(row[0]))
-                outputter.plot([point])
+if __name__ == '__main__':
+    cap = cv2.VideoCapture('./data/videos/ds/11.mov')
+    csv_1 = 'data/csv/20190318_1.csv'
+    csv_2 = 'data/csv/sample_plot.csv'
 
-def mydata_plot(num=3):
-    # with open('data/csv/tempmatch_writer_row_'+str(num)+'.csv') as f:
-    with open('data/csv/sample_writer_row_'+str(num)+'.csv') as f:
-        reader = csv.reader(f)
-        outputter = PingpongPlot()
-        prev = np.array([[0],[0],[0]])
-                # else: outputter.plot([point])
-                # prev = point
-                outputter.plot([point])
-
-def compare_me_ds_plot(num=3):
-    cap = cv2.VideoCapture('./data/videos/ds/1'+str(num)+'.mov')
     for i in range(int(60*5.5)):
         ret, frame = cap.read()
     fps = 1./30.
     time_counter = 0
-    time_ds = 0
-    time_me = 0
-    diff = 2.38 # 2.55
-    jump = 23 # 1.2
-    seq = {
-        'image': [],
-        'ds': [],
-        'me': [],
-        'ts': [],
-    }
-
-    with open('data/csv/20190318_'+str(num)+'.csv') as f_ds:
-        with open('data/csv/sample_writer_row_'+str(num)+'.csv') as f_me:
-            data_ds = [row for row in csv.reader(f_ds)]
-            data_me = [row for row in csv.reader(f_me)]
-            outputter = PingpongPlot()
-            point_me = np.array([[0],[0],[0]])
-            point_ds = np.array([[0],[0],[0]])
-            while data_ds:
-                row_ds = data_ds.pop(0)
-                if len(row_ds)!=11: continue
     time_1 = 0
     time_2 = 0
     diff = 0.1
