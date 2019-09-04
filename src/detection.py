@@ -73,7 +73,7 @@ def search_template_area(images, name=''):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
             radius = int(np.sqrt(area/np.pi)//1 + 1)
             template = masked_img[y-radius:y+radius,x-radius:x+radius]
-            if template: Settings.update_template(name, template)
+            if template.any(): Settings.update_template(name, template)
     return Settings.get_template(name), masked_img
 
 def template_matching_detection(images, name=''):
@@ -107,15 +107,14 @@ def template_matching_detection(images, name=''):
         if len(temp_imgs) > 5:
             small_values = [val for i, val in enumerate(max_values) if unique[i]]
             small_values.sort()
-            print(small_values)
             while len(temp_imgs) > 5 and small_values:
                 idx = max_values.index(small_values.pop(0))
                 Settings.remove_template(name, idx)
                 max_values.pop(idx)
                 temp_imgs = Settings.get_template(name)
 
-        for i, temp in enumerate(temp_imgs):
-            cv2.imshow('temp'+name+'-'+str(i), temp)
+        # for i, temp in enumerate(temp_imgs):
+        #     cv2.imshow('temp'+name+'-'+str(i), temp)
                 
     for p in points:
         cv2.circle(images[1],(int(p[0]),int(p[1])), 5, (0,0,255), -1)
