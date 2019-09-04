@@ -103,9 +103,9 @@ def template_matching_detection(images, name=''):
                 else: unique[j] = False
 
         points = [points[i] for i in range(len(points)) if unique[i]]
-    
-        while max_values[:-2]:
-            idx = max_values.index(min(max_values[:-2]))
+        
+        while max_values[:-5]:
+            idx = max_values.index(min(max_values))
             Settings.remove_template(name, idx)
             max_values.pop(idx)
 
