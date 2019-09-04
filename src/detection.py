@@ -104,14 +104,10 @@ def template_matching_detection(images, name=''):
 
         points = [points[i] for i in range(len(points)) if unique[i]]
     
-        if len(temp_imgs) > 5:
-            small_values = [val for i, val in enumerate(max_values) if unique[i]]
-            small_values.sort()
-            while len(temp_imgs) > 5 and small_values:
-                idx = max_values.index(small_values.pop(0))
-                Settings.remove_template(name, idx)
-                max_values.pop(idx)
-                temp_imgs = Settings.get_template(name)
+        while max_values[:-2]:
+            idx = max_values.index(min(max_values[:-2]))
+            Settings.remove_template(name, idx)
+            max_values.pop(idx)
 
         # for i, temp in enumerate(temp_imgs):
         #     cv2.imshow('temp'+name+'-'+str(i), temp)
