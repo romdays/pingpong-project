@@ -72,8 +72,8 @@ def search_template_area(images, name=''):
         if (Settings.get('TEMPLATE_MIN_CIRCULARITY')<circularity and circularity<1.0):
             x,y= int(mu["m10"]/mu["m00"]), int(mu["m01"]/mu["m00"])
             radius = int(np.sqrt(area/np.pi)//1 + 1)
-            if x < radius or y < radius: continue
-            Settings.update_template(name, masked_img[y-radius:y+radius,x-radius:x+radius])
+            template = masked_img[y-radius:y+radius,x-radius:x+radius]
+            if template: Settings.update_template(name, template)
     return Settings.get_template(name), masked_img
 
 def template_matching_detection(images, name=''):
